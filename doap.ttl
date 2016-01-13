@@ -1,0 +1,12 @@
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://github.com/melgi/turtle> a doap:Project ;
+    doap:name          "Turtle" ;
+    doap:license       <http://www.apache.org/licenses/LICENSE-2.0> ;
+    doap:description   "Convert RDF Turtle to N-Triples or N3P"@en ;
+    doap:created       "2016-01-12"^^xsd:date ;
+    doap:programming-language "C++" ;
+    doap:implements    <http://www.w3.org/TR/turtle/> ;
+    doap:category      <http://dbpedia.org/resource/Resource_Description_Framework>, <http://dbpedia.org/resource/Turtle_(syntax)> ;
+    doap:developer     <http://github.com/melgi> .
