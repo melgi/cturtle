@@ -18,7 +18,7 @@
 #include <ostream>
 #include <iostream>
 
-#include "../Uri.hh"
+#include "../src/Uri.hh"
 #include "catch.hpp"
 
 

@@ -20,8 +20,8 @@ SHELL=/bin/sh
 
 CXXFLAGS=-Wall -march=native
 SOURCES:=$(wildcard *.cc)
-INCLUDES:=$(wildcard ../*.hh)
-OBJECTS:= $(patsubst %.cc, %.o, $(SOURCES)) $(filter-out ../Main.o, $(wildcard ../*.o))
+INCLUDES:=$(wildcard ../src/*.hh)
+OBJECTS:= $(patsubst %.cc, %.o, $(SOURCES)) $(filter-out ../obj/Main.o, $(wildcard ../obj/*.o))
 
 all: test-turtle
 

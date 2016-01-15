@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-.PHONY: all install uninstall installdirs test clean tar zip 
+.PHONY: all install uninstall installdirs test clean maintainer-clean distclean dist tar zip 
 
 SHELL=/bin/sh
 
@@ -23,18 +23,15 @@ exec_prefix=$(prefix)
 bindir=$(exec_prefix)/bin
 
 CXXFLAGS=-O2 -Wall -march=native
-#-march=x86-64
-#-Wpedantic
 LFLAGS=--warn
 
 INSTALL=install
 INSTALL_PROGRAM=$(INSTALL)
 INSTALL_DATA=$(INSTALL) -m 644
 LEXER_CC=TurtleLexer.cc
-SOURCES:=$(filter-out $(LEXER_CC), $(wildcard *.cc))
-OBJECTS:=$(patsubst %.cc, %.o, $(LEXER_CC) $(SOURCES))
-INCLUDES:=$(wildcard *.hh)
-#LIBS=-luriparser
+SOURCES:=src/$(LEXER_CC) $(filter-out src/$(LEXER_CC), $(wildcard src/*.cc))
+OBJECTS:=$(patsubst src/%.cc, obj/%.o, $(SOURCES))
+INCLUDES:=$(wildcard src/*.hh)
 
 
 all: turtle
@@ -44,11 +41,12 @@ turtle: $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
 
 
-%.o: %.cc $(INCLUDES)
+obj/%.o: src/%.cc $(INCLUDES)
+	@mkdir -p $(@D)
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -std=c++11 -o $@ $<
 
 
-$(LEXER_CC): Turtle.l
+src/$(LEXER_CC): src/Turtle.l
 	$(LEX) $(LFLAGS) -o $@ $<
 
 
@@ -70,34 +68,45 @@ test: turtle
 
 
 clean:
-	rm -f *.o
-	rm -f $(LEXER_CC)
+	rm -f obj/*.o
 	rm -f turtle
-	rm -f turtle-src.tar.gz
-	rm -f turtle-src.zip
+	rm -f turtle.tar.gz
+	rm -f turtle.zip
 	$(MAKE) -C test clean
 
 
-tar: turtle-src.tar.gz
+maintainer-clean: clean
+	rm -f src/$(LEXER_CC)
 
 
-turtle-src.tar.gz: $(SOURCES) Turtle.l $(INCLUDES) LICENSE
+distclean: clean
+
+
+dist: tar
+
+
+tar: turtle.tar.gz
+
+
+turtle.tar.gz: $(SOURCES) src/Turtle.l $(INCLUDES) LICENSE README.md
 	$(eval TMP := $(shell mktemp -d turtle.XXXXXXXX -t))
-	mkdir $(TMP)/turtle
-	cp $(SOURCES) Turtle.l $(INCLUDES) $(MAKEFILE_LIST) LICENSE $(TMP)/turtle
+	mkdir -p $(TMP)/turtle/src
+	cp $(MAKEFILE_LIST) LICENSE README.md $(TMP)/turtle
+	cp $(SOURCES) src/Turtle.l $(INCLUDES) $(TMP)/turtle/src
 	mkdir $(TMP)/turtle/test
 	cp test/*.cc test/*.hpp test/Makefile $(TMP)/turtle/test
 	tar -C $(TMP) -czf $@ turtle
 	rm -rf $(TMP)
 
 
-zip: turtle-src.zip
+zip: turtle.zip
 
 
-turtle-src.zip: $(SOURCES) Turtle.l $(INCLUDES) LICENSE
+turtle.zip: $(SOURCES) src/Turtle.l $(INCLUDES) LICENSE README.md
 	$(eval TMP := $(shell mktemp -d turtle.XXXXXXXX -t))
-	mkdir $(TMP)/turtle
-	cp $(SOURCES) Turtle.l $(INCLUDES) $(MAKEFILE_LIST) LICENSE $(TMP)/turtle
+	mkdir -p $(TMP)/turtle/src
+	cp $(MAKEFILE_LIST) LICENSE README.md $(TMP)/turtle
+	cp $(SOURCES) src/Turtle.l $(INCLUDES) $(TMP)/turtle/src
 	mkdir $(TMP)/turtle/test
 	cp test/*.cc test/*.hpp test/Makefile $(TMP)/turtle/test
 	cd $(TMP) && zip -r $@ turtle
