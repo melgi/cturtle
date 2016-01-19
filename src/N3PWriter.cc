@@ -18,7 +18,7 @@
 
 namespace turtle {
 
-	const std::string N3PFormatter::SKOLEM_PREFIX("http://aca.agfa.net/.well-known/genid/#");
+	const std::string N3PFormatter::SKOLEM_PREFIX("https://melgi.github.io/.well-known/genid/#");
 	const char N3PFormatter::HEX_CHAR[] = "0123456789ABCDEF";
 
 	void N3PWriter::writePrologue()
