@@ -59,6 +59,8 @@ namespace turtle {
 							opt.format = std::string(argv[++i]);
 					}
 					error = opt.format.empty() || (opt.format != NTRIPLES && opt.format != N3P);
+				} else if (arg == "-h") {
+					opt.help = true;
 				} else if (arg == "--") {
 					stop = true;
 				} else {

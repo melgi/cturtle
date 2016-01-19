@@ -30,6 +30,7 @@ namespace turtle {
 		static const std::string NTRIPLES;
 		
 		bool error;
+		bool help;
 		std::vector<std::string> inputs;
 		Optional<std::string> output;
 		Optional<std::string> base;

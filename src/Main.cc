@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	
 	turtle::CommandLine opt = turtle::CommandLine::parse(argc, argv);
 	
-	if (opt.error) {
+	if (opt.error || opt.help) {
 		std::cerr << argv[0] << " [-b=base-uri] [-o=output-file] [-f=(nt|n3p)] [input-files] " << std::endl;
 		return -1;
 	}
