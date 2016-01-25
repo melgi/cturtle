@@ -11,8 +11,8 @@
 	doap:programming-language "C++" ;
 	doap:implements    <http://www.w3.org/TR/turtle/> ;
 	doap:category      <http://dbpedia.org/resource/Resource_Description_Framework>, <http://dbpedia.org/resource/Turtle_(syntax)> ;
-	doap:developer     <http://melgi.github.io/foaf#me> .
+	doap:developer     <http://melgi.github.io/card#me> .
 
-<http://melgi.github.io/foaf#me> a foaf:Person ;
+<http://melgi.github.io/card#me> a foaf:Person ;
 	foaf:name "Giovanni Mels" ;
 	foaf:homepage <http://melgi.github.io/> .
