@@ -133,20 +133,34 @@ namespace turtle {
 	{
 		const std::string &value = literal.lexical();
 		
-		// values like .5 and -.5 are not allowed in prolog
-		// values like 5. are not allowed in prolog
-		
-		if (value[0] == '.') {
-			m_out << '0' << value;
-		} else if (value[0] == '-' && value[1] == '.') {
-			m_out << "-0" << value.substr(1);
+		if (m_rdivDecimal) {
+			std::size_t p = value.find('.');
+			if (p == std::string::npos) {
+				m_out << value << " rdiv 1";
+			} else {
+				m_out.write(value.c_str(), p++);
+				std::size_t len = value.length() - p;
+				m_out.write(value.c_str() + p, len);
+				m_out << " rdiv 1";
+				for (std::size_t i = 0; i < len; i++)
+					m_out << '0';
+			}
 		} else {
-			m_out << value;
+			// values like .5 and -.5 are not allowed in prolog
+			// values like 5. are not allowed in prolog
+			
+			if (value[0] == '.') {
+				m_out << '0' << value;
+			} else if (value[0] == '-' && value[1] == '.') {
+				m_out << "-0" << value.substr(1);
+			} else {
+				m_out << value;
+			}
+			
+			std::size_t length = value.length();
+			if (length > 0 && value[length - 1] == '.')
+				m_out << '0';
 		}
-		
-		std::size_t length = value.length();
-		if (length > 0 && value[length - 1] == '.')
-			m_out << '0';
 	}
 
 }

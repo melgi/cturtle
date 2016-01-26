@@ -19,6 +19,7 @@
 namespace turtle {
 	
 	const std::string CommandLine::N3P      = "n3p";
+	const std::string CommandLine::N3P_RDIV = "n3p-rdiv";
 	const std::string CommandLine::NTRIPLES = "nt";
 
 	CommandLine CommandLine::parse(int argc, char *argv[])
@@ -58,7 +59,7 @@ namespace turtle {
 						if (opt.format.empty() && i + 1 < argc)
 							opt.format = std::string(argv[++i]);
 					}
-					error = opt.format.empty() || (opt.format != NTRIPLES && opt.format != N3P);
+					error = opt.format.empty() || (opt.format != NTRIPLES && opt.format != N3P && opt.format != N3P_RDIV);
 				} else if (arg == "-h") {
 					opt.help = true;
 				} else if (arg == "--") {

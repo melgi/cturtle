@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	turtle::CommandLine opt = turtle::CommandLine::parse(argc, argv);
 	
 	if (opt.error || opt.help) {
-		std::cerr << argv[0] << " [-b=base-uri] [-o=output-file] [-f=(nt|n3p)] [input-files] " << std::endl;
+		std::cerr << argv[0] << " [-b=base-uri] [-o=output-file] [-f=(nt|n3p|n3p-rdiv)] [input-files] " << std::endl;
 		return -1;
 	}
 	
@@ -53,11 +53,15 @@ int main(int argc, char *argv[])
 	if (opt.output && *opt.output != "-")
 		out = std::unique_ptr<std::ostream>(new std::ofstream(*opt.output));
 	
-	std::unique_ptr<turtle::TripleSink> sink((opt.format == turtle::CommandLine::N3P)
-		? static_cast<turtle::TripleSink *>(new turtle::N3PWriter(out ? *out : std::cout))
-		: static_cast<turtle::TripleSink *>(new turtle::NTriplesWriter(out ? *out : std::cout)));
-	
-	//std::unique_ptr<turtle::TripleSink> sink(new turtle::NullSink());
+	turtle::TripleSink *s;
+	if (opt.format == turtle::CommandLine::N3P)
+		s = new turtle::N3PWriter(out ? *out : std::cout);
+	else if (opt.format == turtle::CommandLine::N3P_RDIV)
+		s = new turtle::N3PWriter(out ? *out : std::cout, true);
+	else
+		s = new turtle::NTriplesWriter(out ? *out : std::cout);
+		
+	std::unique_ptr<turtle::TripleSink> sink(s);
 	
 	typedef std::chrono::high_resolution_clock Clock;
 	
