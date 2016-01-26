@@ -99,7 +99,7 @@ namespace turtle {
 		std::unique_ptr<BlankNode> triples(const RDFList &list);
 		
 	public:
-		NTriplesWriter(std::ostream &out) : TripleSink(), m_out(out), m_formatter(out), m_idgen(), m_count(0) {}
+		explicit NTriplesWriter(std::ostream &out) : TripleSink(), m_out(out), m_formatter(out), m_idgen(), m_count(0) {}
 		
 		void start()
 		{

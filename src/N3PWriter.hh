@@ -28,11 +28,12 @@ namespace turtle {
 
 	class N3PFormatter : public N3NodeVisitor {
 		std::ostream &m_out;
+		bool m_rdivDecimal; // output decimals as rdivs
 	public:
 		static const std::string SKOLEM_PREFIX;
 		static const char HEX_CHAR[];
 		
-		explicit N3PFormatter(std::ostream &out) : N3NodeVisitor(), m_out(out) {}
+		explicit N3PFormatter(std::ostream &out, bool rdivDecimal) : N3NodeVisitor(), m_out(out), m_rdivDecimal(rdivDecimal) {}
 		
 		void visit(const URIResource &resource) { m_out << "'<"; outputUri(resource.uri()); m_out << ">'"; }
 		void visit(const BlankNode &blankNode)  { m_out << "'<" << SKOLEM_PREFIX << blankNode.id() << ">'"; }
@@ -140,7 +141,7 @@ namespace turtle {
 		void outputTriple(const N3Node &subject, const URIResource &property, const N3Node &object);
 		
 	public:
-		N3PWriter(std::ostream &out) : TripleSink(), m_out(out), m_formatter(out), m_properties(), m_count(0) {}
+		explicit N3PWriter(std::ostream &out, bool rdivDecimal = false) : TripleSink(), m_out(out), m_formatter(out, rdivDecimal), m_properties(), m_count(0) {}
 		
 		void document(const std::string &source)
 		{

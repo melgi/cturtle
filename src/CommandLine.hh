@@ -27,6 +27,7 @@ namespace turtle {
 	struct CommandLine {
 		
 		static const std::string N3P;
+		static const std::string N3P_RDIV;
 		static const std::string NTRIPLES;
 		
 		bool error;
