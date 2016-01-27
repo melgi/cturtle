@@ -9,9 +9,9 @@ Turtle is a tool for parsing [RDF 1.1 Turtle](http://www.w3.org/TR/turtle/) file
 
 * `-b=baseUri` the base URI to use when resolving relative URIs.
 * `-o=output-file` where the results are written, write to stdout when omitted.
-* `-f=nt` output triples in [N-Triples](http://www.w3.org/TR/n-triples/) format.
-* `-f=n3p` (default) output triples in N3P format.
-* `-f=n3p-rdiv` (default) output triples in N3P format, use `rdiv` to output decimals.
+* `-f=nt` (default) output triples in [N-Triples](http://www.w3.org/TR/n-triples/) format.
+* `-f=n3p` output triples in N3P format.
+* `-f=n3p-rdiv` output triples in N3P format, use `rdiv` to output decimals.
 * `input-files` the turtle input files to process, read from stdin when omitted.
 
 # Limitations
