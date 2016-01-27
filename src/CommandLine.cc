@@ -64,6 +64,8 @@ namespace turtle {
 					opt.help = true;
 				} else if (arg == "--") {
 					stop = true;
+				} else if (arg.length() > 1 && arg[0] == '-') {
+					error = true;
 				} else {
 					opt.inputs.push_back(arg);
 				}
