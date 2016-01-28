@@ -1,3 +1,5 @@
 *.o
 turtle
 turtle.exe
+*.zip
+*.gz
