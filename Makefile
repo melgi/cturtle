@@ -34,10 +34,10 @@ OBJECTS:=$(patsubst src/%.cc, obj/%.o, $(SOURCES))
 INCLUDES:=$(wildcard src/*.hh)
 
 
-all: turtle
+all: cturtle
 
 
-turtle: $(OBJECTS)
+cturtle: $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
 
 
@@ -50,28 +50,28 @@ src/$(LEXER_CC): src/Turtle.l
 	$(LEX) $(LFLAGS) -o $@ $<
 
 
-install: turtle installdirs
-	$(INSTALL_PROGRAM) turtle $(DESTDIR)$(bindir)
+install: cturtle installdirs
+	$(INSTALL_PROGRAM) cturtle $(DESTDIR)$(bindir)
 
 
 uninstall:
-	rm -f $(DESTDIR)$(bindir)/turtle
+	rm -f $(DESTDIR)$(bindir)/cturtle
 
 
 installdirs:
 	mkdir -p $(DESTDIR)$(bindir)
 
 
-test: turtle
+test: cturtle
 	$(MAKE) -C test
-	test/test-turtle
+	test/test-cturtle
 
 
 clean:
 	rm -f obj/*.o
-	rm -f turtle
-	rm -f turtle.tar.gz
-	rm -f turtle.zip
+	rm -f cturtle
+	rm -f cturtle.tar.gz
+	rm -f cturtle.zip
 	$(MAKE) -C test clean
 
 
@@ -85,30 +85,30 @@ distclean: clean
 dist: tar
 
 
-tar: turtle.tar.gz
+tar: cturtle.tar.gz
 
 
-turtle.tar.gz: $(SOURCES) src/Turtle.l $(INCLUDES) LICENSE README.md
-	$(eval TMP := $(shell mktemp -d turtle.XXXXXXXX -t))
-	mkdir -p $(TMP)/turtle/src
-	cp $(MAKEFILE_LIST) LICENSE README.md $(TMP)/turtle
-	cp $(SOURCES) src/Turtle.l $(INCLUDES) $(TMP)/turtle/src
-	mkdir $(TMP)/turtle/test
-	cp test/*.cc test/*.hpp test/Makefile $(TMP)/turtle/test
-	tar -C $(TMP) -czf $@ turtle
+cturtle.tar.gz: $(SOURCES) src/Turtle.l $(INCLUDES) LICENSE README.md
+	$(eval TMP := $(shell mktemp -d cturtle.XXXXXXXX -t))
+	mkdir -p $(TMP)/cturtle/src
+	cp $(MAKEFILE_LIST) LICENSE README.md $(TMP)/cturtle
+	cp $(SOURCES) src/Turtle.l $(INCLUDES) $(TMP)/cturtle/src
+	mkdir $(TMP)/cturtle/test
+	cp test/*.cc test/*.hpp test/Makefile $(TMP)/cturtle/test
+	tar -C $(TMP) -czf $@ cturtle
 	rm -rf $(TMP)
 
 
-zip: turtle.zip
+zip: cturtle.zip
 
 
-turtle.zip: $(SOURCES) src/Turtle.l $(INCLUDES) LICENSE README.md
-	$(eval TMP := $(shell mktemp -d turtle.XXXXXXXX -t))
-	mkdir -p $(TMP)/turtle/src
-	cp $(MAKEFILE_LIST) LICENSE README.md $(TMP)/turtle
-	cp $(SOURCES) src/Turtle.l $(INCLUDES) $(TMP)/turtle/src
-	mkdir $(TMP)/turtle/test
-	cp test/*.cc test/*.hpp test/Makefile $(TMP)/turtle/test
-	cd $(TMP) && zip -r $@ turtle
+cturtle.zip: $(SOURCES) src/Turtle.l $(INCLUDES) LICENSE README.md
+	$(eval TMP := $(shell mktemp -d cturtle.XXXXXXXX -t))
+	mkdir -p $(TMP)/cturtle/src
+	cp $(MAKEFILE_LIST) LICENSE README.md $(TMP)/cturtle
+	cp $(SOURCES) src/Turtle.l $(INCLUDES) $(TMP)/cturtle/src
+	mkdir $(TMP)/cturtle/test
+	cp test/*.cc test/*.hpp test/Makefile $(TMP)/cturtle/test
+	cd $(TMP) && zip -r $@ cturtle
 	cp $(TMP)/$@ .
 	rm -rf $(TMP)

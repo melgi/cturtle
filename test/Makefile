@@ -23,9 +23,9 @@ SOURCES:=$(wildcard *.cc)
 INCLUDES:=$(wildcard ../src/*.hh)
 OBJECTS:= $(patsubst %.cc, %.o, $(SOURCES)) $(filter-out ../obj/Main.o, $(wildcard ../obj/*.o))
 
-all: test-turtle
+all: test-cturtle
 
-test-turtle: $(OBJECTS)
+test-cturtle: $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
 
 %.o: %.cc $(INCLUDES)
@@ -33,4 +33,4 @@ test-turtle: $(OBJECTS)
 
 clean:
 	rm -f *.o
-	rm -f test-turtle
+	rm -f test-cturtle
