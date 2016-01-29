@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Turtle by melgi</title>
+    <title>CTurtle by melgi</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
@@ -16,13 +16,13 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1 class="header">Turtle</h1>
+        <h1 class="header">CTurtle</h1>
         <p class="header">Convert RDF Turtle to N-Triples or N3P</p>
 
         <ul>
-          <li class="download"><a class="buttons" href="https://github.com/melgi/turtle/zipball/master">Download ZIP</a></li>
-          <li class="download"><a class="buttons" href="https://github.com/melgi/turtle/tarball/master">Download TAR</a></li>
-          <li><a class="buttons github" href="https://github.com/melgi/turtle">View On GitHub</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/melgi/cturtle/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/melgi/cturtle/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/melgi/cturtle">View On GitHub</a></li>
         </ul>
 
         <p class="header">This project is maintained by <a class="header name" href="https://github.com/melgi">melgi</a></p>
@@ -31,15 +31,15 @@
       </header>
       <section>
         <h1>
-<a id="turtle" class="anchor" href="#turtle" aria-hidden="true"><span class="octicon octicon-link"></span></a>Turtle</h1>
+<a id="turtle" class="anchor" href="#cturtle" aria-hidden="true"><span class="octicon octicon-link"></span></a>CTurtle</h1>
 
-<p>Turtle is a tool for parsing <a href="http://www.w3.org/TR/turtle/">RDF 1.1 Turtle</a> files and outputting the resulting triples in "N3P" format.
+<p>CTurtle is a tool for parsing <a href="http://www.w3.org/TR/turtle/">RDF 1.1 Turtle</a> files and outputting the resulting triples in "N3P" format.
 "N3P" is a RDF serialization format used by the <a href="http://eulersharp.sourceforge.net/">Eye reasoner</a>.</p>
 
 <h1>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h1>
 
-<p><code>turtle [-b=base-uri] [-o=output-file] [-f=(nt|n3p)] [input-files]</code></p>
+<p><code>cturtle [-b=base-uri] [-o=output-file] [-f=(nt|n3p|n3p-rdiv)] [input-files]</code></p>
 
 <ul>
 <li>
@@ -50,6 +50,8 @@
 <code>-f=nt</code> (default) output triples in <a href="http://www.w3.org/TR/n-triples/">N-Triples</a> format.</li>
 <li>
 <code>-f=n3p</code> output triples in N3P format.</li>
+<li>
+<code>-f=n3p-rdiv</code> output triples in N3P format, use <code>rdiv</code> to output decimals.</li>
 <li>
 <code>input-files</code> the turtle input files to process, read from stdin when omitted.</li>
 </ul>
