@@ -114,25 +114,3 @@ void print(std::ostream &out, const turtle::Uri &uri)
 	out << "query: " << (uri.query() ? "\"" + *uri.query() + "\"" : "<undefined>") << std::endl;
 	out << "fragment: " << (uri.fragment() ? "\"" + *uri.fragment() + "\"" : "<undefined>") << std::endl;
 }
-
-/*
-#include <cwchar>
-#include <clocale>
-
-TEST_CASE("test utf8") {
-	
-	//std::string input = "test \\u20AC 100."
-	
-	wchar_t euro = 0x20AC;
-	
-	std::setlocale(LC_ALL, "en_US.utf-8");
-	
-	std::mbstate_t state {};
-	
-	std::string mb(MB_CUR_MAX, '\0');
-	
-	int result = std::wcrtomb(&mb[0], euro, &state);
-	
-	std::cout << result << " " << mb << std::endl;	
-}
-*/
