@@ -1,5 +1,7 @@
 *.o
 cturtle
 cturtle.exe
+test-cturtle
+test-cturtle.exe
 *.zip
 *.gz
