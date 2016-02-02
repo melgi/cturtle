@@ -27,6 +27,7 @@
 #include "NTriplesWriter.hh"
 #include "N3PWriter.hh"
 #include "Util.hh"
+#include "Version.hh"
 
 
 int main(int argc, char *argv[])
@@ -45,7 +46,9 @@ int main(int argc, char *argv[])
 	turtle::CommandLine opt = turtle::CommandLine::parse(argc, argv);
 	
 	if (opt.error || opt.help) {
-		std::cerr << argv[0] << " [-b=base-uri] [-o=output-file] [-f=(nt|n3p|n3p-rdiv)] [input-files] " << std::endl;
+		std::cerr << "cturtle version " << CTURTLE_VERSION_STR << std::endl;
+		std::cerr << "\nUsage: cturtle [-b=base-uri] [-o=output-file] [-f=(nt|n3p|n3p-rdiv)] [input-files]" << std::endl;
+		
 		return -1;
 	}
 	
