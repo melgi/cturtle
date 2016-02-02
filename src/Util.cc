@@ -21,8 +21,15 @@
 #include <stdexcept>
 #include <algorithm>
 
+#include <unistd.h>
+
+
 namespace turtle {
 
+	// TODO this behaves different on Windows and Linux when "file" does not exist
+	//(Windows: OK, Linux: fail)
+	// Also PATH_MAX is only 255 on Windows
+	// Use _getcwd (Windows) getcwd (Linux) in stead?
 	std::string toUri(const std::string &file)
 	{
 		char buf[PATH_MAX]; 
@@ -30,7 +37,7 @@ namespace turtle {
 		const char *rp = ::_fullpath(buf, file.c_str(), PATH_MAX);
 		
 		if (!rp)
-			throw std::runtime_error(file + " not found");
+			throw std::runtime_error("could not determine the absolute path for " + file);
 		
 		std::string absPath = std::string(rp);
 		
@@ -41,10 +48,15 @@ namespace turtle {
 		const char *rp = ::realpath(file.c_str(), buf);
 					
 		if (!rp)
-			throw std::runtime_error(file + " not found");
+			throw std::runtime_error("could not determine the absolute path for " + file);
 			
 		return "file://" + std::string(rp);
-#endif
+#endif // _WIN32
 	}
-
+	
+	bool exists(const std::string &fileName)
+	{
+		return access(fileName.c_str(), F_OK) == 0;
+	}
+	
 }

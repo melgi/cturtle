@@ -50,8 +50,15 @@ int main(int argc, char *argv[])
 	}
 	
 	std::unique_ptr<std::ostream> out;
-	if (opt.output && *opt.output != "-")
+	if (opt.output && *opt.output != "-") {
 		out = std::unique_ptr<std::ostream>(new std::ofstream(*opt.output));
+		
+		if (!*out) {
+			std::cerr << "error opening \"" << *opt.output << "\"" << std::endl;
+			
+			return -1;
+		}
+	}
 	
 	turtle::TripleSink *s;
 	if (opt.format == turtle::CommandLine::N3P)
@@ -75,8 +82,21 @@ int main(int argc, char *argv[])
 		
 		std::unique_ptr<std::ifstream> in;
 		if (input != "-") {
+			if (!turtle::exists(input)) {
+				std::cerr << "\"" << input << "\" not found" << std::endl;
+				sink->end();
+				
+				return -1;
+			}
+			
 			uri = turtle::toUri(input);
 			in = std::unique_ptr<std::ifstream>(new std::ifstream(input, std::ios_base::in | std::ios_base::binary));
+			if (!*in) {
+				std::cerr << "error opening \"" << input << "\"" << std::endl;
+				sink->end();
+				
+				return -1;
+			}
 		} else {
 			uri = "file:///dev/stdin";
 		}

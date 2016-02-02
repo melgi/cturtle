@@ -14,10 +14,16 @@
 // limitations under the License.
 //
 
+#ifndef N3_UTIL_HH
+#define N3_UTIL_HH
+
 #include <string>
 
 namespace turtle {
 
 	std::string toUri(const std::string &file);
-
+	
+	bool exists(const std::string &fileName);
 }
+
+#endif /* N3_UTIL_HH */
