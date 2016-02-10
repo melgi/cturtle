@@ -23,8 +23,21 @@
 
 #include <unistd.h>
 
+#ifdef _WIN32
+#	include <io.h>     // _setmode
+#	include <fcntl.h>  // _O_BINARY
+#endif
+
 
 namespace turtle {
+
+	void useBinaryStreams()
+	{
+#ifdef _WIN32
+		_setmode(_fileno(stdin), _O_BINARY);
+		_setmode(_fileno(stdout), _O_BINARY);
+#endif
+	}
 
 	// TODO this behaves different on Windows and Linux when "file" does not exist
 	//(Windows: OK, Linux: fail)

@@ -21,6 +21,8 @@
 
 namespace turtle {
 
+	void useBinaryStreams();
+	
 	std::string toUri(const std::string &file);
 	
 	bool exists(const std::string &fileName);

@@ -32,6 +32,8 @@
 
 int main(int argc, char *argv[])
 {
+	turtle::useBinaryStreams();
+
 	std::cin.sync_with_stdio(false);
 	std::cout.sync_with_stdio(false);
 	
