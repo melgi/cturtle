@@ -32,61 +32,146 @@ namespace turtle {
 	};
 
 	class Uri {
+
+		std::string m_value;
 		
-		enum class ParseState { Scheme, Authority, Path, Query, Fragment };
+		std::size_t m_scheme;    std::size_t m_schemeLength;
+		std::size_t m_authority; std::size_t m_authorityLength;
+		std::size_t m_host;      std::size_t m_hostLength;
+		std::size_t m_path;      std::size_t m_pathLength;
+		std::size_t m_query;     std::size_t m_queryLength;
+		std::size_t m_fragment;
 		
-		Optional<std::string> m_scheme;
-		Optional<std::string> m_authority;
-		std::string m_path;
-		Optional<std::string> m_query;
-		Optional<std::string> m_fragment;
+		Uri(const std::string value)
+				: m_value(value),
+				  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
+				  m_authority(std::string::npos), m_authorityLength(std::string::npos),
+				  m_host(std::string::npos),      m_hostLength(std::string::npos),
+				  m_path(std::string::npos),      m_pathLength(std::string::npos),
+				  m_query(std::string::npos),     m_queryLength(std::string::npos),
+				  m_fragment(std::string::npos)
+		{
+			// nop
+		}
 		
-		std::size_t m_hostBegin;
-		std::size_t m_hostLength;
-		
-		void parseAuthority(const std::string &authority);
-		static std::string removeDotSegments(std::string input);
-	public:
 		Uri(const Optional<std::string> &scheme,
-		const Optional<std::string> &authority,
-		const std::string &path = std::string(),
-		const Optional<std::string> &query    = Optional<std::string>(),
-		const Optional<std::string> &fragment = Optional<std::string>())
-			: m_scheme(scheme), m_authority(authority), m_path(path), m_query(query), m_fragment(fragment), m_hostBegin(0), m_hostLength(0)
+			const Optional<std::string> &authority,
+			const std::string &path = std::string(),
+			const Optional<std::string> &query    = Optional<std::string>(),
+			const Optional<std::string> &fragment = Optional<std::string>())
+				: m_value(),
+				  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
+				  m_authority(std::string::npos), m_authorityLength(std::string::npos),
+				  m_host(std::string::npos),      m_hostLength(std::string::npos),
+				  m_path(std::string::npos),      m_pathLength(std::string::npos),
+				  m_query(std::string::npos),     m_queryLength(std::string::npos),
+				  m_fragment(std::string::npos)
+
 		{
-			if (m_authority)
-				parseAuthority(*m_authority);
+			if (scheme) {
+				m_scheme       = 0;
+				m_schemeLength = scheme->length();
+				m_value.append(*scheme).push_back(':');
+			}
+			
+			if (authority) {
+				m_value.append("//");
+				m_authority       = m_value.length();
+				m_authorityLength = authority->length();
+				m_value.append(*authority);
+				parseAuthorityComponents();
+			}
+			
+			m_path       = m_value.length();
+			m_pathLength = path.length();
+			m_value.append(path);
+			
+			if (query) {
+				m_value.push_back('?');
+				m_query       = m_value.length();
+				m_queryLength = query->length();
+				m_value.append(*query);
+			}
+			
+			if (fragment) {
+				m_value.push_back('#');
+				m_fragment = m_value.length();
+				m_value.append(*fragment);
+			}
 		}
 		
-		Uri(const std::string &scheme,
-		const std::string &authority,
-		const std::string &path = std::string(),
-		const Optional<std::string> &query    = Optional<std::string>(),
-		const Optional<std::string> &fragment = Optional<std::string>())
-			: m_scheme(scheme), m_authority(authority), m_path(path), m_query(query), m_fragment(fragment), m_hostBegin(0), m_hostLength(0)
+		void parseComponents();
+		void parseAuthority(std::size_t begin);
+		void parseAuthorityComponents();
+		void parsePath();
+		void parseQuery();
+		
+		static std::string removeDotSegments(std::string input);
+
+	public:
+
+		static Uri parse(const std::string &value)
 		{
-			parseAuthority(*m_authority);
+			Uri uri(value);
+			
+			uri.parseComponents();
+			
+			return uri;
 		}
 		
-		static Uri parse(const std::string &s);
+		Optional<std::string> scheme() const
+		{
+			return m_scheme != std::string::npos ? Optional<std::string>(m_value.substr(m_scheme, m_schemeLength)) : Optional<std::string>::none;
+		}
 		
-		const Optional<std::string> &scheme()    const { return m_scheme;    } 
-		const Optional<std::string> &authority() const { return m_authority; }
-		const std::string           &path()      const { return m_path;      }
-		const Optional<std::string> &query()     const { return m_query;     }
-		const Optional<std::string> &fragment()  const { return m_fragment;  }
-			
-		Optional<std::string> userInfo() const;
-		Optional<std::string> host()     const;
-		Optional<std::string> port()     const;
-			
-		bool absolute() const { return static_cast<bool>(m_scheme); }
+		Optional<std::string> authority() const
+		{
+			return m_authority != std::string::npos ? Optional<std::string>(m_value.substr(m_authority, m_authorityLength)) : Optional<std::string>::none;
+		}
 		
+		std::string path() const
+		{
+			return m_value.substr(m_path, m_pathLength);
+		}
+		
+		Optional<std::string> query() const
+		{
+			return m_query != std::string::npos ? Optional<std::string>(m_value.substr(m_query, m_queryLength)) : Optional<std::string>::none;
+		}
+		
+		Optional<std::string> fragment() const
+		{
+			return m_fragment != std::string::npos ? Optional<std::string>(m_value.substr(m_fragment)) : Optional<std::string>::none;
+		}
+		
+		Optional<std::string> userInfo() const
+		{
+			return m_authority != std::string::npos && (m_host > m_authority) ? Optional<std::string>(m_value.substr(m_authority, m_host - 1 - m_authority)) : Optional<std::string>::none;
+		}
+	
+		Optional<std::string> host() const
+		{
+			return m_host != std::string::npos ? Optional<std::string>(m_value.substr(m_host, m_hostLength)) : Optional<std::string>::none;
+		}
+		
+		Optional<std::string> port() const
+		{
+			if (m_authority == std::string::npos)
+				return Optional<std::string>::none;
+			
+			std::size_t n = m_host + m_hostLength;
+			
+			return n < m_authority + m_authorityLength ? Optional<std::string>(m_value.substr(n + 1, m_authority + m_authorityLength - n - 1)) : Optional<std::string>::none;
+		}
+		
+		bool absolute() const { return m_scheme != std::string::npos; }
+			
 		Uri resolve(const Uri &reference) const;
-		
+			
 		explicit operator std::string() const;
+			
+		friend std::ostream &operator<<(std::ostream &out, const Uri &uri);
 		
-		friend std::ostream &operator<<(std::ostream &out, const Uri &uri); 
 	};
 
 

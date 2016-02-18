@@ -16,188 +16,167 @@
 
 #include "Uri.hh"
 
-
 // ^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?
 //       12            3  4          5       6  7        8 9
 
 namespace turtle {
 	
-	Uri Uri::parse(const std::string &s)
+	void Uri::parseComponents()
 	{
-		Optional<std::string> scheme;
-		Optional<std::string> authority;
-		std::string           path;
-		Optional<std::string> query;
-		Optional<std::string> fragment;
-		
-		ParseState state = ParseState::Scheme;
-		std::size_t i = 0, j = 0;
-		while (i < s.length()) {
-			char c = s[i];
-			
-			if (state == ParseState::Scheme) {
-				if (c == ':') {
-					if (i == 0) {
-						state  = ParseState::Path;
-					} else {
-						scheme = s.substr(0, i);
-						j      = ++i;
-						state  = ParseState::Authority;
-					}
-				} else if (c == '/') {
-					if (i == 0) {
-						j     = i;
-						state = ParseState::Authority;
-					} else {
-						state = ParseState::Path;
-					}
-				} else if (c == '?') {
-					path  = s.substr(0, i);
-					j     = ++i;
-					state = ParseState::Query;
-				} else if (c == '#') {
-					path  = s.substr(0, i);
-					j     = ++i;
-					state = ParseState::Fragment;
-				} else
-					++i;
-			} else if (state == ParseState::Authority) {
-				if (c == '/') {
-					if (i != j && i != j + 1) {
-						if (s[j] == '/' && s[j + 1] == '/') {
-							j += 2;
-							authority = s.substr(j, i - j);
-							j         = i;
-						}
-						state = ParseState::Path;
-					} else {
-						++i;
-					}
-				} else if (c == '?') {
-					if (s[j] == '/' && s[j + 1] == '/') {
-						j += 2;
-						authority = s.substr(j, i - j);
-						j = ++i;
-					} else {
-						path = s.substr(j, i - j);
-						j    = ++i;
-					}
-					state = ParseState::Query;
-				} else if (c == '#') {
-					if (s[j] == '/' && s[j + 1] == '/') {
-						j += 2;
-						authority = s.substr(j, i - j);
-						j         = ++i;
-					} else {
-						path = s.substr(j, i - j);
-						j    = ++i;
-					}
-					state = ParseState::Fragment;
-				} else
-					++i;
-			} else if (state == ParseState::Path) {
-				if (c == '?') {
-					path  = s.substr(j, i - j);
-					j     = ++i;
-					state = ParseState::Query;
-				} else if (c == '#') {
-					path  = s.substr(j, i - j);
-					j     = ++i;
-					state = ParseState::Fragment;
-				} else
-					++i;
-			} else if (state == ParseState::Query) {
-				if (c == '#') {
-					query = s.substr(j, i - j);
-					j     = ++i;
-					state = ParseState::Fragment;
-				} else
-					++i;
-			} else {
-				++i;
+		std::size_t p = m_value.find_first_of(":/?#");
+		if (p == std::string::npos) {
+			m_path       = 0;
+			m_pathLength = m_value.length();
+		} else {
+			char c = m_value[p];
+			if (c == ':') {
+				if (p == 0) {
+					m_path = 0;
+					parsePath();
+				} else {
+					m_scheme       = 0;
+					m_schemeLength = p;
+					parseAuthority(p + 1);
+				}
+			} else if (c == '/') {
+				parseAuthority(0);
+			} else if (c == '?') {
+				m_path       = 0;
+				m_pathLength = p;
+				m_query      = p + 1;
+				parseQuery();
+			} else if (c == '#') {
+				m_path       = 0;
+				m_pathLength = p;
+				m_fragment   = p + 1;
 			}
 		}
 		
-		if (state == ParseState::Scheme) {
-			path = s.substr(j);
-		} else if (state == ParseState::Authority) {
-			if (s.length() - j >= 2 && s[j] == '/' && s[j + 1] == '/')
-				authority = s.substr(j + 2);
-			else
-				path = s.substr(j);
-		} else if (state == ParseState::Path) {
-			path = s.substr(j);
-		} else if (state == ParseState::Query) {
-			query = s.substr(j);
-		} else if (state == ParseState::Fragment) {
-			fragment = s.substr(j);
-		}
+		parseAuthorityComponents();
 		
-		
-		if (authority) {
-			if (!(path.empty() || path[0] == '/'))
+		if (m_authority != std::string::npos) {
+			if (!(m_pathLength == 0 || m_value[m_path] == '/'))
 				throw UriSyntaxException("path should be empty or start with '/'");
 		} else {
-			if (path.length() >= 2 && path[0] == '/' && path[1] == '/')
+			if (m_pathLength >= 2 && m_value[m_path] == '/' && m_value[m_path + 1] == '/')
 				throw UriSyntaxException("path starts with '//'");
 		}
 		
-		if (!scheme && !authority && !path.empty()) {
-			for (auto i = path.begin(); i != path.end() && *i != '/'; ++i) {
-				if (*i == ':')
+		if (m_scheme == std::string::npos && m_authority == std::string::npos && m_pathLength != 0) {
+			for (std::size_t i = 0; i < m_pathLength && m_value[m_path + i] != '/'; ++i) {
+				if (m_value[m_path + i] == ':')
 					throw UriSyntaxException("relative path reference contains a ':' in the first path segment");
 			}
 		}
-		
-		return Uri(scheme, authority, path, query, fragment);
+	}
+
+	void Uri::parseAuthority(std::size_t begin)
+	{
+		if (m_value.length() - begin >= 2 && m_value[begin] == '/' && m_value[begin + 1] == '/') {
+			begin += 2;
+			m_authority = begin;
+			std::size_t p = m_value.find_first_of("/?#", begin);
+			if (p != std::string::npos) {
+				m_authorityLength = p - begin;
+				char c = m_value[p];
+				if (c == '/') {
+					m_path = p;
+					parsePath();
+				} else if (c == '?') {
+					m_query = p + 1;
+					parseQuery();
+				} else {
+					m_fragment = p + 1;
+				}
+			} else {
+				m_authorityLength = m_value.length() - begin;
+				m_path            = m_value.length();
+				m_pathLength      = 0;
+			}
+		} else {
+			m_path = begin;
+			parsePath();
+		}
+	}
+
+	void Uri::parsePath()
+	{
+		std::size_t p = m_value.find_first_of("?#", m_path);
+		if (p != std::string::npos) {
+			m_pathLength = p - m_path;
+			if (m_value[p] == '?') {
+				m_query = p + 1;
+				parseQuery();
+			} else {
+				m_fragment = p + 1;
+			}
+		} else {
+			m_pathLength = m_value.length() - m_path;
+		}
+	}
+
+	void Uri::parseQuery()
+	{
+		std::size_t p = m_value.find('#', m_query);
+		if (p != std::string::npos) {
+			m_queryLength = p - m_query;
+			m_fragment    = p + 1;
+		}
 	}
 	
-	void Uri::parseAuthority(const std::string &authority)
+	void Uri::parseAuthorityComponents()
 	{
-		if (authority.empty())
+		if (m_authority == std::string::npos || m_authorityLength == 0)
 			return;
 		
-		std::size_t a = authority.find('@'); // first position of '@' in authority, or std::string:npos if not found
+		std::size_t authorityEnd = m_authority + m_authorityLength;
+		
+		std::size_t a = m_value.find('@', m_authority); // first position of '@' in authority, or std::string:npos if not found
+		if (a >= authorityEnd)
+			a = std::string::npos;
+				
 		std::size_t c = std::string::npos; // last position of ':' in authority, or std::string:npos if not found or if c would be less than a
 		
-		std::size_t b = a + 1;
-		if (b < authority.length() && authority[b] == '[') {
-			b = authority.find(']', b + 1);
-			if (b == std::string::npos)
+		std::size_t b = a == std::string::npos ? m_authority : a + 1;
+		if (b < authorityEnd && m_value[b] == '[') {
+			b = m_value.find(']', b + 1);
+			if (b == std::string::npos || b >= authorityEnd)
 				throw UriSyntaxException("unclosed bracket in authority");
 			b++;
-			if (b < authority.length()) {
-				if (authority[b] == ':')
+			if (b < authorityEnd) {
+				if (m_value[b] == ':')
 					c = b;
 				else
 					throw UriSyntaxException("illegal authority");
 			}
 		} else {
-			c = authority.rfind(':');
+			c = m_value.rfind(':', authorityEnd);
+			
+			if (c < m_authority)
+				c = std::string::npos;
 		
 			if (c != std::string::npos && a != std::string::npos && c < a)
 				c = std::string::npos;
 		}
 		
-		m_hostBegin  =  a == std::string::npos ? 0 : a + 1;
-		m_hostLength = (c == std::string::npos ? authority.length() : c) - m_hostBegin;
+		m_host       =  a == std::string::npos ? m_authority : a + 1;
+		m_hostLength = (c == std::string::npos ? authorityEnd : c) - m_host;
 		
 		if (m_hostLength == 0)
-			throw UriSyntaxException("host is empty");
+			throw UriSyntaxException("host is empty " + m_value);
 	}
-	
+
 	Uri Uri::resolve(const Uri &reference) const
 	{
 		if (reference.absolute())
 			return reference;
-		
-		//TODO prevent copying
+
 		Optional<std::string> scheme;
 		Optional<std::string> authority;
 		std::string path;
 		Optional<std::string> query;
 		
-		if (reference.scheme()) {
+		if (reference.m_scheme != std::string::npos) {
 			scheme    = reference.scheme();
 			authority = reference.authority();
 			path      = removeDotSegments(reference.path());
@@ -207,45 +186,48 @@ namespace turtle {
 				return reference; // correct?
 			}
 		} else {
-			if (reference.authority()) {
+			if (reference.m_authority != std::string::npos) {
 				authority = reference.authority();
 				path      = removeDotSegments(reference.path());
 				query     = reference.query();
 			} else {
-				if (reference.path().empty()) {
-					path = m_path;
-					if (reference.query())
+				if (reference.m_pathLength == 0) {
+					path = this->path();
+					if (reference.m_query != std::string::npos)
 						query = reference.query();
 					else
-						query = m_query;
+						query = this->query();
 				} else {
-					if (reference.path()[0] == '/') {
+					if (reference.m_value[reference.m_path] == '/') {
 						path = removeDotSegments(reference.path());
 					} else {
-						if (m_authority && m_path.empty()) {
-							path.append("/").append(reference.path());
+						if (m_authority != std::string::npos && m_pathLength == 0) {
+							path.push_back('/');
+							path.append(reference.m_value, reference.m_path, reference.m_pathLength);
 						} else {
-							if (m_path.empty())
+							if (m_pathLength == 0) {
 								path = reference.path();
-							else {
-								std::size_t n = m_path.rfind('/');
-								if (n == std::string::npos)
+							} else {
+								std::size_t n = m_value.rfind('/', m_path + m_pathLength);
+								if (n == std::string::npos || n < m_path)
 									path = reference.path();
 								else
-									path.append(m_path.substr(0, n + 1)).append(reference.path());
+									path.append(m_value, m_path, n + 1 - m_path)
+									    .append(reference.m_value, reference.m_path, reference.m_pathLength);
 							}
 						}
 						path = removeDotSegments(path);
 					}
 					query = reference.query();
 				}
-				authority = m_authority;
+				authority = this->authority();
 			}
-			scheme = m_scheme;
+			scheme = this->scheme();
 		}
 		
 		return Uri(scheme, authority, path, query, reference.fragment());
 	}
+
 	
 	
 	std::string Uri::removeDotSegments(std::string input)
@@ -299,100 +281,16 @@ namespace turtle {
 		return output;
 	}
 	
-	Optional<std::string> Uri::userInfo() const
-	{
-		return m_authority &&  (m_hostBegin > 0) ? Optional<std::string>(m_authority->substr(0, m_hostBegin - 1)) : Optional<std::string>();
-	}
-	
-	Optional<std::string> Uri::host() const
-	{
-		if (!m_authority)
-			return Optional<std::string>();
-		
-		if (m_hostLength == m_authority->length())
-			return m_authority;
-		
-		return Optional<std::string>(m_authority->substr(m_hostBegin, m_hostLength));
-	}
-	
-	Optional<std::string> Uri::port() const
-	{
-		if (!m_authority)
-			return Optional<std::string>();
-		
-		std::size_t n = m_hostBegin + m_hostLength;
-		
-		return n < m_authority->length() ? Optional<std::string>(m_authority->substr(n + 1)) : Optional<std::string>();
-	}
-	
 	Uri::operator std::string() const
 	{
-		std::string result;
-		
-		std::size_t size = m_path.length();
-		if (m_scheme) {
-			size += m_scheme->length();
-			size++;
-		}
-		
-		if (m_authority) {
-			size += m_authority->length();
-			size += 2;
-		}
-		
-		if (m_query) {
-			size += m_query->length();
-			size++;
-		}
-		
-		if (m_fragment) {
-			size += m_fragment->length();
-			size++;
-		}
-		
-		result.reserve(size);
-		
-		if (m_scheme) {
-			result.append(*m_scheme);
-			result.push_back(':');
-		}
-		
-		if (m_authority)
-			result.append("//").append(*m_authority);
-			
-		result.append(m_path);
-		
-		if (m_query) {
-			result.push_back('?');
-			result.append(*m_query);
-		}
-		
-		if (m_fragment) {
-			result.push_back('#');
-			result.append(*m_fragment);
-		}
-		
-		return result;
+		return m_value;
 	}
 	
 	std::ostream &operator<<(std::ostream &out, const Uri &uri)
 	{
-		if (uri.scheme())
-			out << *uri.scheme() << ':';
-		
-		if (uri.authority())
-			out << "//" << *uri.authority();
-		
-		out << uri.path();
-		
-		if (uri.query())
-			out << '?' << *uri.query();
-		
-		if (uri.fragment())
-			out << '#' << *uri.fragment();
+		out << uri.m_value;
 		
 		return out;
 	}
-
 
 }
