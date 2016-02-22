@@ -76,15 +76,21 @@ namespace turtle {
 		rawTriple(*s, property, *o);
 	}
 
-	void NTriplesWriter::rawTriple(const Resource &subject, const URIResource &property, const N3Node &object)
+	inline void NTriplesWriter::rawTriple(const Resource &subject, const URIResource &property, const N3Node &object)
 	{
 		m_count++;
 		subject.visit(m_formatter);
-		m_out << ' ';
+		m_outbuf->sputc(' ');
 		property.visit(m_formatter);
-		m_out << ' ';
+		m_outbuf->sputc(' ');
 		object.visit(m_formatter);
-		m_out << " .\n";
+		m_outbuf->sputc(' ');
+		m_outbuf->sputc('.');
+		
+#ifdef CTURTLE_CRLF
+		m_outbuf->sputc('\r');
+#endif
+		m_outbuf->sputc('\n');
 	}
 
 }
