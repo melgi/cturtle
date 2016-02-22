@@ -149,7 +149,7 @@ namespace turtle {
 						case '"'  : m_outbuf->sputc('\\'); m_outbuf->sputc('\\'); m_outbuf->sputc('"');                         break;
 						case '\'' : m_outbuf->sputc('\\'); m_outbuf->sputc('\'');                                               break;
 						case '\\' : m_outbuf->sputc('\\'); m_outbuf->sputc('\\'); m_outbuf->sputc('\\'); m_outbuf->sputc('\\'); break;
-						default   :	m_outbuf->sputc(c);
+						default   : m_outbuf->sputc(c);
 					}
 				}
 			}
