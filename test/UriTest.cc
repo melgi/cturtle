@@ -27,7 +27,7 @@ void print(std::ostream &out, const turtle::Uri &uri);
 
 
 TEST_CASE("resolve", "[uri]") {
-	turtle::Uri base = turtle::Uri::parse("http://a/b/c/d;p?q");
+	turtle::Uri base("http://a/b/c/d;p?q");
 	
 	SECTION("normal") {
 		REQUIRE("g:h" == resolve(base, "g:h"));
@@ -83,7 +83,7 @@ TEST_CASE("resolve", "[uri]") {
 }
 
 TEST_CASE("parse", "[uri]") {
-	turtle::Uri uri = turtle::Uri::parse("http://user@www.ics.uci.edu:8080/pub/ietf/uri/#Related");
+	turtle::Uri uri("http://user@www.ics.uci.edu:8080/pub/ietf/uri/#Related");
 	
 	REQUIRE(uri.absolute());
 	REQUIRE(uri.scheme()); REQUIRE(*uri.scheme() == "http");
@@ -98,9 +98,9 @@ TEST_CASE("parse", "[uri]") {
 
 std::string resolve(const turtle::Uri &base, const std::string &reference)
 {
-	turtle::Uri r = turtle::Uri::parse(reference);
+	turtle::Uri r(reference);
 	
-	return std::string(base.resolve(r));
+	return static_cast<std::string>(base.resolve(r));
 }
 
 void print(std::ostream &out, const turtle::Uri &uri)
