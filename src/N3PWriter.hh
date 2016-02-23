@@ -28,8 +28,6 @@
 
 namespace turtle {
 	
-	class N3PWriter;
-
 	class N3PFormatter : public N3NodeVisitor {
 		std::streambuf *m_outbuf;
 		
@@ -39,98 +37,21 @@ namespace turtle {
 		static const std::string SKOLEM_PREFIX;
 		static const char HEX_CHAR[];
 		
-		explicit N3PFormatter(std::ostream &out, bool rdivDecimal) : N3NodeVisitor(), m_outbuf(out.rdbuf()), m_rdivDecimal(rdivDecimal)
+		N3PFormatter(std::ostream &out, bool rdivDecimal) : N3NodeVisitor(), m_outbuf(out.rdbuf()), m_rdivDecimal(rdivDecimal)
 		{
 			// nop
 		}
 		
-		void visit(const URIResource &resource)
-		{
-			m_outbuf->sputc('\'');
-			m_outbuf->sputc('<');
-			outputUri(resource.uri());
-			m_outbuf->sputc('>');
-			m_outbuf->sputc('\'');
-		}
-		
-		void visit(const BlankNode &blankNode)
-		{
-			const std::string &id = blankNode.id();
-			
-			m_outbuf->sputc('\'');
-			m_outbuf->sputc('<');
-			m_outbuf->sputn(SKOLEM_PREFIX.c_str(), SKOLEM_PREFIX.length());
-			m_outbuf->sputn(id.c_str(), id.length());
-			m_outbuf->sputc('>');
-			m_outbuf->sputc('\'');
-		}
-		
-		void visit(const Literal &literal)
-		{
-			m_outbuf->sputn("literal('", 9);
-			output(literal.lexical());
-			m_outbuf->sputn("',type('<", 9);
-			outputUri(literal.datatype());
-			m_outbuf->sputn(">'))", 4);
-		}
-		
-		void visit(const BooleanLiteral &literal)
-		{
-			const std::string &lexical = literal.value() ? BooleanLiteral::VALUE_TRUE.lexical() : BooleanLiteral::VALUE_FALSE.lexical();
-			
-			m_outbuf->sputn(lexical.c_str(), lexical.length());
-		}
-		
-		void visit(const IntegerLiteral &literal)
-		{
-			const std::string &lexical = literal.lexical();
-			
-			m_outbuf->sputn(lexical.c_str(), lexical.length());
-		}
-		
+		void visit(const URIResource &resource);
+		void visit(const BlankNode &blankNode);
+		void visit(const Literal &literal);
+		void visit(const BooleanLiteral &literal);
+		void visit(const IntegerLiteral &literal);
 		void visit(const DoubleLiteral &literal);
 		void visit(const DecimalLiteral &literal);
-		
-		void visit(const StringLiteral &literal)
-		{
-			m_outbuf->sputn("literal('", 9);
-			output(literal.lexical());
-			m_outbuf->sputc('\'');
-			const std::string &lang = literal.language();
-			if (!lang.empty()) {
-				m_outbuf->sputn(",lang('", 7);
-				m_outbuf->sputn(lang.c_str(), lang.length());
-				m_outbuf->sputc('\'');
-				m_outbuf->sputc(')');
-			} else {
-				m_outbuf->sputn(",type('<", 8);
-				m_outbuf->sputn(StringLiteral::TYPE.c_str(), StringLiteral::TYPE.length());
-				m_outbuf->sputc('>');
-				m_outbuf->sputc('\'');
-				m_outbuf->sputc(')');
-			}
+		void visit(const StringLiteral &literal);
+		void visit(const RDFList &list);
 			
-			m_outbuf->sputc(')');
-		}
-		
-		void visit(const RDFList &list)
-		{ 
-			m_outbuf->sputc('[');
-			if (!list.empty()) {
-				auto i = list.begin();
-				(*i)->visit(*this);
-				++i;
-				//m_count += 2;
-				while (i != list.end()) {
-					m_outbuf->sputc(',');
-					(*i)->visit(*this);
-					++i;
-					//m_count += 2;
-				}
-			}
-			m_outbuf->sputc(']');
-		}
-		
 		void output(const std::string &s)
 		{
 			for (auto i = s.cbegin(); i != s.cend(); ++i) {

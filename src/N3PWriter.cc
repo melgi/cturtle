@@ -19,8 +19,6 @@
 
 namespace turtle {
 
-	const std::string N3PFormatter::SKOLEM_PREFIX("https://melgi.github.io/.well-known/genid/#");
-	const char N3PFormatter::HEX_CHAR[] = "0123456789ABCDEF";
 
 	void N3PWriter::writePrologue()
 	{
@@ -118,6 +116,60 @@ namespace turtle {
 	}
 	
 	
+	
+	
+	
+	
+	
+	
+	const std::string N3PFormatter::SKOLEM_PREFIX("https://melgi.github.io/.well-known/genid/#");
+	const char N3PFormatter::HEX_CHAR[] = "0123456789ABCDEF";	
+	
+	
+	void N3PFormatter::visit(const URIResource &resource)
+	{
+		m_outbuf->sputc('\'');
+		m_outbuf->sputc('<');
+		outputUri(resource.uri());
+		m_outbuf->sputc('>');
+		m_outbuf->sputc('\'');
+	}
+	
+	void N3PFormatter::visit(const BlankNode &blankNode)
+	{
+		const std::string &id = blankNode.id();
+		
+		m_outbuf->sputc('\'');
+		m_outbuf->sputc('<');
+		m_outbuf->sputn(SKOLEM_PREFIX.c_str(), SKOLEM_PREFIX.length());
+		m_outbuf->sputn(id.c_str(), id.length());
+		m_outbuf->sputc('>');
+		m_outbuf->sputc('\'');
+	}
+	
+	void N3PFormatter::visit(const Literal &literal)
+	{
+		m_outbuf->sputn("literal('", 9);
+		output(literal.lexical());
+		m_outbuf->sputn("',type('<", 9);
+		outputUri(literal.datatype());
+		m_outbuf->sputn(">'))", 4);
+	}
+	
+	void N3PFormatter::visit(const BooleanLiteral &literal)
+	{
+		const std::string &lexical = literal.value() ? BooleanLiteral::VALUE_TRUE.lexical() : BooleanLiteral::VALUE_FALSE.lexical();
+		
+		m_outbuf->sputn(lexical.c_str(), lexical.length());
+	}
+	
+	void N3PFormatter::visit(const IntegerLiteral &literal)
+	{
+		const std::string &lexical = literal.lexical();
+		
+		m_outbuf->sputn(lexical.c_str(), lexical.length());
+	}
+	
 	void N3PFormatter::visit(const DoubleLiteral &literal)
 	{
 		const std::string &value = literal.lexical();
@@ -199,4 +251,43 @@ namespace turtle {
 		}
 	}
 
+	void N3PFormatter::visit(const StringLiteral &literal)
+	{
+		m_outbuf->sputn("literal('", 9);
+		output(literal.lexical());
+		m_outbuf->sputc('\'');
+		const std::string &lang = literal.language();
+		if (!lang.empty()) {
+			m_outbuf->sputn(",lang('", 7);
+			m_outbuf->sputn(lang.c_str(), lang.length());
+			m_outbuf->sputc('\'');
+			m_outbuf->sputc(')');
+		} else {
+			m_outbuf->sputn(",type('<", 8);
+			m_outbuf->sputn(StringLiteral::TYPE.c_str(), StringLiteral::TYPE.length());
+			m_outbuf->sputc('>');
+			m_outbuf->sputc('\'');
+			m_outbuf->sputc(')');
+		}
+		
+		m_outbuf->sputc(')');
+	}
+	
+	void N3PFormatter::visit(const RDFList &list)
+	{ 
+		m_outbuf->sputc('[');
+		if (!list.empty()) {
+			auto i = list.begin();
+			(*i)->visit(*this);
+			++i;
+			//m_count += 2;
+			while (i != list.end()) {
+				m_outbuf->sputc(',');
+				(*i)->visit(*this);
+				++i;
+				//m_count += 2;
+			}
+		}
+		m_outbuf->sputc(']');
+	}
 }
