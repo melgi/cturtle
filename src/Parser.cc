@@ -25,9 +25,9 @@ namespace turtle {
 	// We do not check if uris are valid, this is used when translating \uxxxx escapes to chars
 	const std::string Parser::INVALID_ESCAPES("<>\"{}|^`\\");
 
-	Uri Parser::resolve(const std::string &uri) const
+	inline Uri Parser::resolve(const std::string &uri) const
 	{
-		Uri u = Uri::parse(uri);
+		Uri u(uri);
 		if (u.absolute())
 			return u;
 		
@@ -46,7 +46,7 @@ namespace turtle {
 		if (i == m_prefixMap.end())
 			throw ParseException("unknown prefix: " + prefix, line());
 		
-		return Uri::parse(i->second + unescape(p + 1, pname));
+		return Uri(i->second + unescape(p + 1, pname));
 	}
 
 	void Parser::turtledoc()

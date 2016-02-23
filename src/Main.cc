@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 		
 		std::cerr << "translating " << uri << std::endl;
 		
-		turtle::Uri baseUri = turtle::Uri::parse(opt.base ? *opt.base : uri);
+		turtle::Uri baseUri(opt.base ? *opt.base : uri);
 		
 		turtle::Parser parser(in ? in.get() : &std::cin, baseUri, sink.get());
 		try {

@@ -42,18 +42,6 @@ namespace turtle {
 		std::size_t m_query;     std::size_t m_queryLength;
 		std::size_t m_fragment;
 		
-		Uri(const std::string value)
-				: m_value(value),
-				  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
-				  m_authority(std::string::npos), m_authorityLength(std::string::npos),
-				  m_host(std::string::npos),      m_hostLength(std::string::npos),
-				  m_path(std::string::npos),      m_pathLength(std::string::npos),
-				  m_query(std::string::npos),     m_queryLength(std::string::npos),
-				  m_fragment(std::string::npos)
-		{
-			// nop
-		}
-		
 		Uri(const Optional<std::string> &scheme,
 			const Optional<std::string> &authority,
 			const std::string &path = std::string(),
@@ -66,7 +54,7 @@ namespace turtle {
 				  m_path(std::string::npos),      m_pathLength(std::string::npos),
 				  m_query(std::string::npos),     m_queryLength(std::string::npos),
 				  m_fragment(std::string::npos)
-
+		
 		{
 			if (scheme) {
 				m_scheme       = 0;
@@ -109,14 +97,17 @@ namespace turtle {
 		static std::string removeDotSegments(std::string input);
 
 	public:
-
-		static Uri parse(const std::string &value)
+	
+		Uri(const std::string &value)
+			: m_value(value),
+			  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
+			  m_authority(std::string::npos), m_authorityLength(std::string::npos),
+			  m_host(std::string::npos),      m_hostLength(std::string::npos),
+			  m_path(std::string::npos),      m_pathLength(std::string::npos),
+			  m_query(std::string::npos),     m_queryLength(std::string::npos),
+			  m_fragment(std::string::npos)
 		{
-			Uri uri(value);
-			
-			uri.parseComponents();
-			
-			return uri;
+			parseComponents();
 		}
 		
 		Optional<std::string> scheme() const
