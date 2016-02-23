@@ -120,15 +120,14 @@ namespace turtle {
 		void match(Token::Type token)
 		{
 			m_lexeme.assign(m_lexer.YYText(), m_lexer.YYLeng());
-			//m_lexeme = m_lexer.YYText();
 			if (m_lookAhead == token)
 				m_lookAhead = nextToken();
 			else
 				throw ParseException("expected different symbol");
 		}
 		
-		Uri resolve(const std::string &uri);
-		Uri toUri(const std::string &pname);
+		Uri resolve(const std::string &uri) const;
+		Uri toUri(const std::string &pname) const;
 		
 		void turtledoc();
 		void base();
@@ -147,11 +146,6 @@ namespace turtle {
 		std::unique_ptr<RDFList> collection();
 		std::unique_ptr<BlankNode> blanknodepropertylist();
 		void propertylistopt(const Resource *subject);
-		
-		static bool hexChar(char c)
-		{
-			return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'); 
-		}
 		
 		static std::string unescape(std::size_t start, const std::string  &localName);
 		static std::string extractUri(const std::string &uriLiteral);

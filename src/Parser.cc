@@ -25,7 +25,7 @@ namespace turtle {
 	// We do not check if uris are valid, this is used when translating \uxxxx escapes to chars
 	const std::string Parser::INVALID_ESCAPES("<>\"{}|^`\\");
 
-	Uri Parser::resolve(const std::string &uri)
+	Uri Parser::resolve(const std::string &uri) const
 	{
 		Uri u = Uri::parse(uri);
 		if (u.absolute())
@@ -34,7 +34,7 @@ namespace turtle {
 		return m_base.resolve(u);
 	}
 
-	Uri Parser::toUri(const std::string &pname)
+	Uri Parser::toUri(const std::string &pname) const
 	{
 		std::size_t p = pname.find(':');
 		if (p == std::string::npos)
