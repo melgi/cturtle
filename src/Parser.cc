@@ -25,7 +25,7 @@ namespace turtle {
 	// We do not check if uris are valid, this is used when translating \uxxxx escapes to chars
 	const std::string Parser::INVALID_ESCAPES("<>\"{}|^`\\");
 
-	inline Uri Parser::resolve(const std::string &uri) const
+	inline Uri Parser::resolve(const std::string &uri)
 	{
 		Uri u(uri);
 		if (u.absolute())
@@ -34,7 +34,7 @@ namespace turtle {
 		return m_base.resolve(u);
 	}
 
-	Uri Parser::toUri(const std::string &pname) const
+	std::string Parser::toUri(const std::string &pname) const
 	{
 		std::size_t p = pname.find(':');
 		if (p == std::string::npos)
@@ -46,7 +46,9 @@ namespace turtle {
 		if (i == m_prefixMap.end())
 			throw ParseException("unknown prefix: " + prefix, line());
 		
-		return Uri(i->second + unescape(p + 1, pname));
+		return i->second + unescape(p + 1, pname);
+		// checking for valid uris is redundant here, i->second is a valid uri, concatenating a fragment or path cannot give a invalid uri.
+		//return static_cast<std::string>(Uri(i->second + unescape(p + 1, pname)));
 	}
 
 	void Parser::turtledoc()
@@ -98,6 +100,7 @@ namespace turtle {
 		match(Token::IriRef);
 		
 		std::string u = extractUri(m_lexeme);
+		
 		m_base = resolve(u);
 	}
 
@@ -127,8 +130,8 @@ namespace turtle {
 	std::unique_ptr<Resource> Parser::subject()
 	{
 		if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
-			Uri uri = iri();
-			return std::unique_ptr<Resource>(new URIResource(static_cast<std::string>(uri)));
+			std::string uri = iri();
+			return std::unique_ptr<Resource>(new URIResource(uri));
 		} else if (m_lookAhead == Token::BlankNodeLabel) {
 			match(Token::BlankNodeLabel);
 			return std::unique_ptr<Resource>(new BlankNode(m_blanks.generate(m_lexeme.substr(2))));
@@ -158,18 +161,19 @@ namespace turtle {
 			match('a');
 			objectlist(subject, &RDF::type);
 		} else if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
-			Uri u = iri();
-			URIResource property(static_cast<std::string>(u));
+			std::string u = iri();
+			URIResource property(u);
 			objectlist(subject, &property);
 		} else
 			throw ParseException("expected 'a' or uri as property", line());
 	}
 
-	Uri Parser::iri()
+	std::string Parser::iri()
 	{
 		if (m_lookAhead == Token::IriRef) {
 			match(Token::IriRef);
-			return resolve(extractUri(m_lexeme));
+			std::string uri = extractUri(m_lexeme);
+			return static_cast<std::string>(resolve(uri));
 		} else if (m_lookAhead == Token::PNameLN) {
 			match(Token::PNameLN);
 			return toUri(m_lexeme);
@@ -204,8 +208,8 @@ namespace turtle {
 			match(Token::BlankNodeLabel);
 			return std::unique_ptr<N3Node>(new BlankNode(m_blanks.generate(m_lexeme.substr(2))));
 		} else if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
-			Uri u = iri();
-			return std::unique_ptr<N3Node>(new URIResource(static_cast<std::string>(u)));
+			std::string u = iri();
+			return std::unique_ptr<N3Node>(new URIResource(u));
 		} else if (m_lookAhead == Token::StringLiteralQuote || m_lookAhead == Token::StringLiteralSingleQuote || m_lookAhead == Token::StringLiteralLongSingleQuote || m_lookAhead == Token::StringLiteralLongQuote || m_lookAhead == Token::True || m_lookAhead == Token::False || m_lookAhead == Token::Integer || m_lookAhead == Token::Decimal || m_lookAhead == Token::Double) {
 			return literal(); // TODO inline here
 		} else if (m_lookAhead == '[') {
@@ -215,7 +219,6 @@ namespace turtle {
 		} else {
 			throw ParseException("expected blank node, iri, literal or list", line());
 		}
-		
 	}
 
 	std::unique_ptr<Literal> Parser::literal()
@@ -263,8 +266,7 @@ namespace turtle {
 			return std::unique_ptr<Literal>(new StringLiteral(lexicalValue, m_lexeme.substr(1)));
 		} else if (m_lookAhead == Token::CaretCaret) {
 			match(Token::CaretCaret);
-			Uri u = iri();
-			const std::string type = static_cast<std::string>(u);
+			const std::string type = iri();
 			if (type == IntegerLiteral::TYPE)
 				return std::unique_ptr<Literal>(new IntegerLiteral(lexicalValue)); //TODO valid check
 			if (type == DecimalLiteral::TYPE)

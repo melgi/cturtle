@@ -126,8 +126,8 @@ namespace turtle {
 				throw ParseException("expected different symbol");
 		}
 		
-		Uri resolve(const std::string &uri) const;
-		Uri toUri(const std::string &pname) const;
+		Uri resolve(const std::string &uri);
+		std::string toUri(const std::string &pname) const;
 		
 		void turtledoc();
 		void base();
@@ -138,7 +138,7 @@ namespace turtle {
 		std::unique_ptr<Resource> subject();
 		void propertylist(const Resource *subject);
 		void property(const Resource *subject);
-		Uri iri();
+		std::string iri();
 		void objectlist(const Resource *subject, const URIResource *property);
 		std::unique_ptr<N3Node> object();
 		std::unique_ptr<Literal> literal();
