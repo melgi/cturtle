@@ -141,7 +141,6 @@ namespace turtle {
 		std::string iri();
 		void objectlist(const Resource *subject, const URIResource *property);
 		std::unique_ptr<N3Node> object();
-		std::unique_ptr<Literal> literal();
 		std::unique_ptr<Literal> dtlang(const std::string &lexicalValue);
 		std::unique_ptr<RDFList> collection();
 		std::unique_ptr<BlankNode> blanknodepropertylist();

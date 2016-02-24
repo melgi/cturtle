@@ -210,20 +210,15 @@ namespace turtle {
 		} else if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
 			std::string u = iri();
 			return std::unique_ptr<N3Node>(new URIResource(u));
-		} else if (m_lookAhead == Token::StringLiteralQuote || m_lookAhead == Token::StringLiteralSingleQuote || m_lookAhead == Token::StringLiteralLongSingleQuote || m_lookAhead == Token::StringLiteralLongQuote || m_lookAhead == Token::True || m_lookAhead == Token::False || m_lookAhead == Token::Integer || m_lookAhead == Token::Decimal || m_lookAhead == Token::Double) {
-			return literal(); // TODO inline here
-		} else if (m_lookAhead == '[') {
-			return blanknodepropertylist();
-		} else if (m_lookAhead == '(') {
-			return collection();
-		} else {
-			throw ParseException("expected blank node, iri, literal or list", line());
-		}
-	}
-
-	std::unique_ptr<Literal> Parser::literal()
-	{
-		if (m_lookAhead == Token::Integer) {
+		} else if (m_lookAhead == Token::StringLiteralQuote) {
+			match(Token::StringLiteralQuote);
+			std::string lexicalValue = extractString(m_lexeme);
+			return dtlang(lexicalValue);
+		} else if (m_lookAhead == Token::StringLiteralLongQuote) {
+			match(Token::StringLiteralLongQuote);
+			std::string lexicalValue = extractString(m_lexeme);
+			return dtlang(lexicalValue);
+		} else if (m_lookAhead == Token::Integer) {
 			match(Token::Integer);
 			return std::unique_ptr<Literal>(new IntegerLiteral(m_lexeme));
 		} else if (m_lookAhead == Token::Decimal) {
@@ -238,10 +233,10 @@ namespace turtle {
 		} else if (m_lookAhead == Token::False) {
 			match(Token::False);
 			return std::unique_ptr<Literal>(new BooleanLiteral(m_lexeme));
-		} else if (m_lookAhead == Token::StringLiteralQuote) {
-			match(Token::StringLiteralQuote);
-			std::string lexicalValue = extractString(m_lexeme);
-			return dtlang(lexicalValue);
+		} else if (m_lookAhead == '[') {
+			return blanknodepropertylist();
+		} else if (m_lookAhead == '(') {
+			return collection();
 		} else if (m_lookAhead == Token::StringLiteralSingleQuote) {
 			match(Token::StringLiteralSingleQuote);
 			std::string lexicalValue = extractString(m_lexeme);
@@ -250,15 +245,11 @@ namespace turtle {
 			match(Token::StringLiteralLongSingleQuote);
 			std::string lexicalValue = extractString(m_lexeme);
 			return dtlang(lexicalValue);
-		} else  if (m_lookAhead == Token::StringLiteralLongQuote) {
-			match(Token::StringLiteralLongQuote);
-			std::string lexicalValue = extractString(m_lexeme);
-			return dtlang(lexicalValue);
 		} else {
-			throw ParseException("expected literal", line());
+			throw ParseException("expected blank node, iri, literal or list", line());
 		}
 	}
-
+	
 	std::unique_ptr<Literal> Parser::dtlang(const std::string &lexicalValue)
 	{
 		if (m_lookAhead == Token::LangTag) {
