@@ -129,38 +129,35 @@ namespace turtle {
 		if (m_authority == std::string::npos || m_authorityLength == 0)
 			return;
 		
-		std::size_t authorityEnd = m_authority + m_authorityLength;
+		const char *authoritybegin = m_value.c_str() + m_authority;
+		const char *authorityEnd   = authoritybegin  + m_authorityLength;
 		
-		std::size_t a = m_value.find('@', m_authority); // first position of '@' in authority, or std::string:npos if not found
-		if (a >= authorityEnd)
-			a = std::string::npos;
+		const char *p = nullptr;
+		const char *h = std::string::traits_type::find(authoritybegin, m_authorityLength, '@');
+		
+		if (h)
+			++h;
+		else
+			h = authoritybegin;
+		
+		if (h < authorityEnd) {
+			if (*h == '[') {
+				p = h + 1;
+				p = std::string::traits_type::find(p, authorityEnd - p, ']');
+				if (!p)
+					throw UriSyntaxException("unclosed bracket in authority");
 				
-		std::size_t c = std::string::npos; // last position of ':' in authority, or std::string:npos if not found or if c would be less than a
-		
-		std::size_t b = a == std::string::npos ? m_authority : a + 1;
-		if (b < authorityEnd && m_value[b] == '[') {
-			b = m_value.find(']', b + 1);
-			if (b == std::string::npos || b >= authorityEnd)
-				throw UriSyntaxException("unclosed bracket in authority");
-			b++;
-			if (b < authorityEnd) {
-				if (m_value[b] == ':')
-					c = b;
-				else
-					throw UriSyntaxException("illegal authority");
+				if (++p < authorityEnd) {
+					if (*p != ':')
+						throw UriSyntaxException("illegal authority");
+				}
+			} else {
+				p = std::string::traits_type::find(h, authorityEnd - h, ':');
 			}
-		} else {
-			c = m_value.rfind(':', authorityEnd);
-			
-			if (c < m_authority)
-				c = std::string::npos;
-		
-			if (c != std::string::npos && a != std::string::npos && c < a)
-				c = std::string::npos;
 		}
 		
-		m_host       =  a == std::string::npos ? m_authority : a + 1;
-		m_hostLength = (c == std::string::npos ? authorityEnd : c) - m_host;
+		m_host       = h - m_value.c_str();
+		m_hostLength = (p ? p : authorityEnd) - h;
 		
 		if (m_hostLength == 0)
 			throw UriSyntaxException("host is empty " + m_value);
