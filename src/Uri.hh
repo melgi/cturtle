@@ -44,9 +44,9 @@ namespace turtle {
 		
 		Uri(const Optional<std::string> &scheme,
 			const Optional<std::string> &authority,
-			const std::string &path = std::string(),
-			const Optional<std::string> &query    = Optional<std::string>(),
-			const Optional<std::string> &fragment = Optional<std::string>())
+			const std::string &path,
+			const Optional<std::string> &query,
+			const Optional<std::string> &fragment)
 				: m_value(),
 				  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
 				  m_authority(std::string::npos), m_authorityLength(std::string::npos),
@@ -94,7 +94,8 @@ namespace turtle {
 		void parsePath();
 		void parseQuery();
 		
-		static std::string removeDotSegments(std::string input);
+		static std::string removeDotSegments(const std::string &input, std::size_t pos = 0, std::size_t len = std::string::npos);
+		static bool startsWith(const char *s, const char *prefix);
 
 	public:
 	

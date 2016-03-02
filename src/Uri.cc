@@ -14,7 +14,11 @@
 // limitations under the License.
 //
 
+#include <cstring>
+
 #include "Uri.hh"
+
+#include <iostream>
 
 // ^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?
 //       12            3  4          5       6  7        8 9
@@ -176,7 +180,7 @@ namespace turtle {
 		if (reference.m_scheme != std::string::npos) {
 			scheme    = reference.scheme();
 			authority = reference.authority();
-			path      = removeDotSegments(reference.path());
+			path      = removeDotSegments(reference.m_value, reference.m_path, reference.m_pathLength);
 			query     = reference.query();
 			
 			if (!authority && path.empty() && !query) {
@@ -185,7 +189,7 @@ namespace turtle {
 		} else {
 			if (reference.m_authority != std::string::npos) {
 				authority = reference.authority();
-				path      = removeDotSegments(reference.path());
+				path      = removeDotSegments(reference.m_value, reference.m_path, reference.m_pathLength);
 				query     = reference.query();
 			} else {
 				if (reference.m_pathLength == 0) {
@@ -196,7 +200,7 @@ namespace turtle {
 						query = this->query();
 				} else {
 					if (reference.m_value[reference.m_path] == '/') {
-						path = removeDotSegments(reference.path());
+						path = removeDotSegments(reference.m_value, reference.m_path, reference.m_pathLength);
 					} else {
 						if (m_authority != std::string::npos && m_pathLength == 0) {
 							path.push_back('/');
@@ -225,59 +229,67 @@ namespace turtle {
 		return Uri(scheme, authority, path, query, reference.fragment());
 	}
 
-	
-	
-	std::string Uri::removeDotSegments(std::string input)
+	inline bool Uri::startsWith(const char *s, const char *prefix)
 	{
-		if (input.empty())
-			return input;
+		while (*prefix) {
+			if (*s++ != *prefix++)
+				return false;
+		}
 		
+		return true;
+	}
+		
+	std::string Uri::removeDotSegments(const std::string &input, std::size_t pos, std::size_t len)
+	{
+		if (len == std::string::npos)
+			len = input.length() - pos;
+			
+		if (len == 0)
+			return std::string();
+			
 		std::string output;
-		output.reserve(input.length());
+		output.reserve(len);
 		
-		// TODO iterator base approach
-		while (input.length() > 0) {
-			if (input.find("../") == 0)
-				input.erase(0, 3);
-			else if (input.find("./") == 0)
-				input.erase(0, 2);
-			else if (input.find("/./") == 0) {
-				input.erase(0, 2);
-			} else if (input.find("/.") == 0 && (input.length() == 2 || input[2] == '/')) {
-				input.erase(1, 1);
-			} else if (input.find("/../") == 0) {
-				input.erase(0, 3);
+		const char *i   = input.c_str() + pos;
+		const char *end = i + len;
+				
+		for (std::size_t left = end - i; left > 0; left = end - i) {
+			if (left >= 3 && startsWith(i, "../")) {
+				i += 3;
+			} else if (left >= 2 && (startsWith(i, "./") || startsWith(i, "/./"))) {
+				i += 2;
+			} else if (left == 2 && startsWith(i, "/.")) {
+				output.push_back('/');
+				i = end;
+			} else if (left >= 4 && startsWith(i, "/../")) {
+				i += 3;
 				std::size_t n = output.rfind('/');
 				if (n == std::string::npos)
-					output.clear();
-				else
-					output.erase(n);
-			} else if (input.find("/..") == 0 && (input.length() == 3 || input[3] == '/')) {
-				input.erase(1, 2);
+					n = 0;
+				output.erase(n);
+			} else if (left == 3 && startsWith(i, "/..")) {
 				std::size_t n = output.rfind('/');
 				if (n == std::string::npos)
-					output.clear();
-				else
-					output.erase(n);
-			} else if (input.length() == 1 && input[0] == '.') {
-				input.erase();
-			} else if (input.length() == 2 && input[0] == '.' && input[1] == '.') {
-				input.erase();
+					n = 0;
+				output.erase(n);
+				output.push_back('/');
+				i = end;
+			} else if (left == 1 && *i == '.') {
+				i++;
+			} else if (left == 2 && startsWith(i, "..")) {
+				i += 2;
 			} else {
-				std::size_t n = input.find('/', 1);
-				if (n != std::string::npos) {
-					output.append(input, 0, n);
-					input.erase(0, n);
-				} else {
-					output.append(input);
-					input.clear();
-				}
+				const char *p = std::string::traits_type::find(i + 1, left - 1, '/');
+				if (!p)
+					p = end;
+				output.append(i, p - i);
+				i = p;
 			}
 		}
 		
 		return output;
 	}
-	
+		
 	Uri::operator std::string() const
 	{
 		return m_value;
