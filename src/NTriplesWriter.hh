@@ -52,9 +52,6 @@ namespace turtle {
 				switch (*i) {
 					case '\n' : m_outbuf->sputc('\\'); m_outbuf->sputc('n');  break;
 					case '\r' : m_outbuf->sputc('\\'); m_outbuf->sputc('r');  break;
-					case '\t' : m_outbuf->sputc('\\'); m_outbuf->sputc('t');  break;
-					case '\f' : m_outbuf->sputc('\\'); m_outbuf->sputc('f');  break;
-					case '\b' : m_outbuf->sputc('\\'); m_outbuf->sputc('b');  break; // backspace, "\u0008"
 					case '"'  : m_outbuf->sputc('\\'); m_outbuf->sputc('"');  break;
 					case '\\' : m_outbuf->sputc('\\'); m_outbuf->sputc('\\'); break;
 					default   : m_outbuf->sputc(*i);
@@ -107,7 +104,7 @@ namespace turtle {
 		}
 
 		void visit(const RDFList &list)
-		{ 
+		{
 			// nop
 		}
 	};
