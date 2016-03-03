@@ -14,11 +14,7 @@
 // limitations under the License.
 //
 
-#include <cstring>
-
 #include "Uri.hh"
-
-#include <iostream>
 
 // ^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?
 //       12            3  4          5       6  7        8 9
@@ -247,7 +243,7 @@ namespace turtle {
 		if (len == 0)
 			return std::string();
 			
-		std::string output;
+		std::string output(0, '\0');
 		output.reserve(len);
 		
 		const char *i   = input.c_str() + pos;
@@ -275,9 +271,9 @@ namespace turtle {
 				output.push_back('/');
 				i = end;
 			} else if (left == 1 && *i == '.') {
-				i++;
+				i = end;
 			} else if (left == 2 && startsWith(i, "..")) {
-				i += 2;
+				i = end;
 			} else {
 				const char *p = std::string::traits_type::find(i + 1, left - 1, '/');
 				if (!p)
