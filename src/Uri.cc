@@ -235,6 +235,30 @@ namespace turtle {
 		return true;
 	}
 		
+	///
+	/// While the input buffer is not empty, loop as follows:
+	///
+	///   A.  If the input buffer begins with a prefix of "../" or "./",
+	///       then remove that prefix from the input buffer; otherwise,
+	///
+	///   B.  if the input buffer begins with a prefix of "/./" or "/.",
+	///       where "." is a complete path segment, then replace that
+	///       prefix with "/" in the input buffer; otherwise,
+	///
+	///   C.  if the input buffer begins with a prefix of "/../" or "/..",
+	///       where ".." is a complete path segment, then replace that
+	///       prefix with "/" in the input buffer and remove the last
+	///       segment and its preceding "/" (if any) from the output
+	///       buffer; otherwise,
+	///
+	///   D.  if the input buffer consists only of "." or "..", then remove
+	///       that from the input buffer; otherwise,
+	///
+	///   E.  move the first path segment in the input buffer to the end of
+	///       the output buffer, including the initial "/" character (if
+	///       any) and any subsequent characters up to, but not including,
+	///       the next "/" character or the end of the input buffer.
+	///
 	std::string Uri::removeDotSegments(const std::string &input, std::size_t pos, std::size_t len)
 	{
 		if (len == std::string::npos)
@@ -250,31 +274,31 @@ namespace turtle {
 		const char *end = i + len;
 				
 		for (std::size_t left = end - i; left > 0; left = end - i) {
-			if (left >= 3 && startsWith(i, "../")) {
+			if (left >= 3 && startsWith(i, "../")) { // A1
 				i += 3;
-			} else if (left >= 2 && (startsWith(i, "./") || startsWith(i, "/./"))) {
+			} else if (left >= 2 && (startsWith(i, "./") || startsWith(i, "/./"))) { // A2, B1
 				i += 2;
-			} else if (left == 2 && startsWith(i, "/.")) {
+			} else if (left == 2 && startsWith(i, "/.")) { // B2
 				output.push_back('/');
 				i = end;
-			} else if (left >= 4 && startsWith(i, "/../")) {
+			} else if (left >= 4 && startsWith(i, "/../")) { // C1
 				i += 3;
 				std::size_t n = output.rfind('/');
 				if (n == std::string::npos)
 					n = 0;
 				output.erase(n);
-			} else if (left == 3 && startsWith(i, "/..")) {
+			} else if (left == 3 && startsWith(i, "/..")) { // C2
 				std::size_t n = output.rfind('/');
 				if (n == std::string::npos)
 					n = 0;
 				output.erase(n);
 				output.push_back('/');
 				i = end;
-			} else if (left == 1 && *i == '.') {
+			} else if (left == 1 && *i == '.') { // D1
 				i = end;
-			} else if (left == 2 && startsWith(i, "..")) {
+			} else if (left == 2 && startsWith(i, "..")) { // D2
 				i = end;
-			} else {
+			} else { // E
 				const char *p = std::string::traits_type::find(i + 1, left - 1, '/');
 				if (!p)
 					p = end;

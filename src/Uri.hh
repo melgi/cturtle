@@ -31,6 +31,9 @@ namespace turtle {
 		explicit UriSyntaxException(const char *reason)                        : std::runtime_error(reason) {}
 	};
 
+	///
+	/// Non-validating URI parser, see https://tools.ietf.org/html/rfc3986
+	///
 	class Uri {
 
 		std::string m_value;
