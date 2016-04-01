@@ -17,6 +17,7 @@
 .PHONY: all install uninstall installdirs test clean maintainer-clean distclean dist tar zip 
 
 SHELL=/bin/sh
+LEX=flex
 
 prefix=/usr/local
 exec_prefix=$(prefix)
