@@ -46,10 +46,10 @@ namespace turtle {
 		std::size_t m_fragment;
 		
 		Uri(const Optional<std::string> &scheme,
-			const Optional<std::string> &authority,
-			const std::string &path,
-			const Optional<std::string> &query,
-			const Optional<std::string> &fragment)
+		    const Optional<std::string> &authority,
+		    const std::string &path,
+		    const Optional<std::string> &query,
+		    const Optional<std::string> &fragment)
 				: m_value(),
 				  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
 				  m_authority(std::string::npos), m_authorityLength(std::string::npos),

@@ -96,6 +96,37 @@ TEST_CASE("parse", "[uri]") {
 	REQUIRE(uri.fragment()); REQUIRE(*uri.fragment() == "Related");
 }
 
+TEST_CASE("empty path 1", "[uri]") {
+	turtle::Uri uri("http://example.org#");
+	
+	REQUIRE(uri.absolute());
+	REQUIRE(uri.scheme()); REQUIRE(*uri.scheme() == "http");
+	REQUIRE(uri.authority()); REQUIRE(*uri.authority() == "example.org");
+	REQUIRE_FALSE(uri.userInfo());
+	REQUIRE(uri.host()); REQUIRE(*uri.host() == "example.org");
+	REQUIRE_FALSE(uri.port());
+	REQUIRE(uri.path() == "");
+	REQUIRE_FALSE(uri.query());
+	REQUIRE(uri.fragment()); REQUIRE(*uri.fragment() == "");
+}
+
+TEST_CASE("empty path 2", "[uri]") {
+	turtle::Uri uri("http://example.org?");
+	
+	REQUIRE(uri.absolute());
+	REQUIRE(uri.scheme()); REQUIRE(*uri.scheme() == "http");
+	REQUIRE(uri.authority()); REQUIRE(*uri.authority() == "example.org");
+	REQUIRE_FALSE(uri.userInfo());
+	REQUIRE(uri.host()); REQUIRE(*uri.host() == "example.org");
+	REQUIRE_FALSE(uri.port());
+	REQUIRE(uri.path() == "");
+	REQUIRE(uri.query()); REQUIRE(*uri.query() == "");
+	REQUIRE_FALSE(uri.fragment());
+}
+
+
+
+
 std::string resolve(const turtle::Uri &base, const std::string &reference)
 {
 	turtle::Uri r(reference);

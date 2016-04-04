@@ -83,10 +83,14 @@ namespace turtle {
 					m_path = p;
 					parsePath();
 				} else if (c == '?') {
-					m_query = p + 1;
+					m_path       = p;
+					m_pathLength = 0;
+					m_query      = p + 1;
 					parseQuery();
 				} else {
-					m_fragment = p + 1;
+					m_path       = p;
+					m_pathLength = 0;
+					m_fragment   = p + 1;
 				}
 			} else {
 				m_authorityLength = m_value.length() - begin;
