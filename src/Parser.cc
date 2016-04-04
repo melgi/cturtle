@@ -53,20 +53,24 @@ namespace turtle {
 
 	void Parser::turtledoc()
 	{
-		while (m_lookAhead != Token::Eof) {
-			if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::BlankNodeLabel || m_lookAhead == Token::PNameNS || m_lookAhead == '[' || m_lookAhead == '(') {
-				triples();
-				match('.');
-			} else if (m_lookAhead == Token::Prefix) {
-				prefixID();
-			} else if (m_lookAhead == Token::Base) {
-				base();
-			} else if (m_lookAhead == Token::SparqlPrefix) {
-				sparqlPrefix();
-			} else if (m_lookAhead == Token::SparqlBase) {
-				sparqlBase();
-			} else
-				throw ParseException("expected base, prefix or triple", line());
+		try {
+			while (m_lookAhead != Token::Eof) {
+				if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::BlankNodeLabel || m_lookAhead == Token::PNameNS || m_lookAhead == '[' || m_lookAhead == '(') {
+					triples();
+					match('.');
+				} else if (m_lookAhead == Token::Prefix) {
+					prefixID();
+				} else if (m_lookAhead == Token::Base) {
+					base();
+				} else if (m_lookAhead == Token::SparqlPrefix) {
+					sparqlPrefix();
+				} else if (m_lookAhead == Token::SparqlBase) {
+					sparqlBase();
+				} else
+					throw ParseException("expected base, prefix or triple", line());
+			}
+		} catch (UriSyntaxException &e) {
+			throw ParseException(e.what(), line());
 		}
 	}
 
