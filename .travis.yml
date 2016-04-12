@@ -1,6 +1,6 @@
 language: cpp
 
-install: true
+install: export CXX=g++-4.8 CC=gcc-4.8
 
 script: make && make test
 
@@ -12,5 +12,5 @@ addons:
         - gcc-4.8
         - g++-4.8
 
-env: CXX=g++-4.8 CC=gcc-4.8
+#env: CXX=g++-4.8 CC=gcc-4.8
 
