@@ -12,4 +12,5 @@ addons:
         - gcc-4.8
         - g++-4.8
 
-env: COMPILER=g++-4.8
+env: CXX=g++-4.8 CC=gcc-4.8
+
