@@ -31,8 +31,12 @@ namespace turtle {
 			
 			std::unique_ptr<BlankNode> nestedList;
 			if (const RDFList *rl = dynamic_cast<const RDFList *>(node)) {
-				nestedList = triples(*rl);
-				node = nestedList.get();
+				if (rl->empty()) {
+					node = &RDF::nil;
+				} else {
+					nestedList = triples(*rl);
+					node = nestedList.get();
+				}
 			}
 				
 			rawTriple(*head, RDF::first, *node);
