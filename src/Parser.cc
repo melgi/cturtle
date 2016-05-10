@@ -345,6 +345,8 @@ namespace turtle {
 		buf.reserve(uriLiteral.length());
 		auto inserter = std::back_inserter(buf);
 		
+		std::uint16_t highSurrogate = 0;
+		
 		for (auto i = uriLiteral.begin() + 1; i < uriLiteral.end() - 1;) {
 			char c = *i;
 			
@@ -356,12 +358,35 @@ namespace turtle {
 						auto begin = ++i; i += 4; 
 						std::string value = std::string(begin, i);
 						int v = std::stoi(value, nullptr, 16);
-						if (v <= 0x20 || (v < 128 && INVALID_ESCAPES.find(std::string::traits_type::to_char_type(v)) != std::string::npos))
-							throw ParseException("\"" + uriLiteral + "\" contains illegal escape \"\\u" + value + "\"");
-						utf8Bytes(v, inserter);
+							
+						if (isHighSurrogate(v)) {
+							if (highSurrogate)
+								throw ParseException("\"" + uriLiteral + "\" contains an unpaired surrogate");
+								
+							highSurrogate = v;
+						} else {
+						
+							if (isLowSurrogate(v)) {
+								if (!highSurrogate)
+									throw ParseException("\"" + uriLiteral + "\" contains an unpaired surrogate");
+									
+								v = convert(highSurrogate, v);
+								utf8Bytes(v, inserter);
+								highSurrogate = 0;
+							} else {
+								if (v <= 0x20 || (v < 128 && INVALID_ESCAPES.find(std::string::traits_type::to_char_type(v)) != std::string::npos))
+									throw ParseException("\"" + uriLiteral + "\" contains illegal escape \"\\u" + value + "\"");
+								
+								utf8Bytes(v, inserter);
+							}
+						}
+						
 						break;
 					}
 					case 'U' : {
+						if (highSurrogate)
+							throw ParseException("\"" + uriLiteral + "\" contains an unpaired surrogate");
+							
 						auto begin = ++i; i += 8;
 						std::string value = std::string(begin, i);
 						int v = std::stoi(value, nullptr, 16);
@@ -374,6 +399,8 @@ namespace turtle {
 						throw ParseException("\"" + uriLiteral + "\" contains illegal escape \"\\" + c + "\"");
 				}
 			} else {
+				if (highSurrogate)
+					throw ParseException("\"" + uriLiteral + "\" contains an unpaired surrogate");
 				inserter = c; // this will actually append c to buf;
 				++i;
 			}
@@ -404,29 +431,81 @@ namespace turtle {
 		std::string buf;
 		buf.reserve(end - start);
 		
+		std::uint16_t highSurrogate = 0;
+		
 		for (std::size_t i = start; i < end; i++) {
 			char c = stringLiteral[i];
 			
 			if (c == '\\') {
 				c = stringLiteral[++i];
 				switch (c) {
-					case 'n' : buf.push_back('\n'); break;
-					case 'r' : buf.push_back('\r'); break;
-					case 't' : buf.push_back('\t'); break;
-					case 'f' : buf.push_back('\f'); break;
-					case 'b' : buf.push_back('\b'); break; // backspace, "\u0008"
-					case '"' : buf.push_back('"');  break;
-					case '\'': buf.push_back('\''); break;
-					case '\\': buf.push_back('\\'); break;
-					
+					case 'n' :
+						if (highSurrogate)
+							throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+						buf.push_back('\n');
+						break;
+					case 'r' : 
+						if (highSurrogate)
+							throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+						buf.push_back('\r');
+						break;
+					case 't' :
+						if (highSurrogate)
+							throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+						buf.push_back('\t');
+						break;
+					case 'f' :
+						if (highSurrogate)
+							throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+						buf.push_back('\f');
+						break;
+					case 'b' : 
+						if (highSurrogate)
+							throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+						buf.push_back('\b');
+						break; // backspace, "\u0008"
+					case '"' :
+						if (highSurrogate)
+							throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+						buf.push_back('"');
+						break;
+					case '\'':
+						if (highSurrogate)
+							throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+						buf.push_back('\'');
+						break;
+					case '\\':
+						if (highSurrogate)
+							throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+						buf.push_back('\\');
+						break;
 					case 'u' : {
 						std::size_t begin = ++i; i += 3; 
 						std::string value = stringLiteral.substr(begin, 4);
 						int v = std::stoi(value, nullptr, 16);
-						utf8Bytes(v, std::back_inserter(buf));
+						
+						if (isHighSurrogate(v)) {
+							if (highSurrogate)
+								throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+								
+							highSurrogate = v;
+						} else {
+							if (isLowSurrogate(v)) {
+								if (!highSurrogate)
+									throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+									
+								v = convert(highSurrogate, v);
+								utf8Bytes(v, std::back_inserter(buf));
+								highSurrogate = 0;
+							} else {
+								utf8Bytes(v, std::back_inserter(buf));
+							}
+						}
 						break;
 					}
 					case 'U' : {
+						if (highSurrogate)
+							throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
 						std::size_t begin = ++i; i += 7;
 						std::string value = stringLiteral.substr(begin, 8);
 						int v = std::stoi(value, nullptr, 16);
@@ -438,6 +517,9 @@ namespace turtle {
 						throw ParseException(stringLiteral + " contains \"\\" + c + "\"");
 				}
 			} else {
+				if (highSurrogate)
+					throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
+					
 				buf.push_back(c);
 			}
 		}

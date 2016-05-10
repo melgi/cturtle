@@ -73,6 +73,9 @@ namespace turtle {
 	std::ostream &operator<<(std::ostream &out, const N3Node &n);
 
 	struct Resource : public N3Node {
+	
+		virtual Resource *clone() const = 0;
+	
 	};
 
 

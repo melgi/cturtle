@@ -19,6 +19,24 @@
 
 namespace turtle {
 	
+	inline bool isHighSurrogate(std::uint16_t i)
+	{
+		return 0xD800 <= i && i <= 0xDBFF;
+	}
+	
+	inline bool isLowSurrogate(std::uint16_t i)
+	{
+		return 0xDC00 <= i && i <= 0xDFFF;
+	}
+	
+	// http://unicode.org/faq/utf_bom.html#utf8-4
+	char32_t convert(std::uint16_t high, std::uint16_t low)
+	{
+		std::uint32_t n = (high & 0x003F) << 10 | (low & 0x03FF);
+		std::uint32_t m = (high >> 6) & 0x001F;
+		return (m + 1) << 16 | n;
+	}
+	
 	template<typename T>
 	std::size_t utf8Bytes(char32_t c, T array)
 	{
