@@ -19,19 +19,19 @@
 
 namespace turtle {
 	
-	template<typename T>
-	std::size_t utf8Bytes(char32_t c, T array)
+	template<typename OutputIterator>
+	std::size_t utf8Bytes(char32_t c, OutputIterator i)
 	{
 		std::size_t size = 0;
 		if (c <= 0x7F) {
-			*array++ = static_cast<char>(c);
+			*i++ = static_cast<char>(c);
 			size = 1;
 		} else if (0x0080 <= c && c <= 0x07FF) {
 			char c0 = static_cast<char>(0x80 | (c & 0x3F));
 			c >>= 6;
 			char c1 = static_cast<char>(0xC0 | (c & 0x1F));
-			*array++ = c1;
-			*array++ = c0;
+			*i++ = c1;
+			*i++ = c0;
 			size = 2;
 		} else if (0x0800 <= c && c <= 0xFFFF) {
 			char c0 = static_cast<char>(0x80 | (c & 0x3F));
@@ -39,9 +39,9 @@ namespace turtle {
 			char c1 = static_cast<char>(0x80 | (c & 0x3F));
 			c >>= 6;
 			char c2 = static_cast<char>(0xE0 | (c & 0x0F));
-			*array++ = c2;
-			*array++ = c1;
-			*array++ = c0;
+			*i++ = c2;
+			*i++ = c1;
+			*i++ = c0;
 			size = 3;
 		} else if (0x00010000 <= c && c <= 0x0010FFFF) {
 			char c0 = static_cast<char>(0x80 | (c & 0x3F));
@@ -51,10 +51,10 @@ namespace turtle {
 			char c2 = static_cast<char>(0x80 | (c & 0x3F));
 			c >>= 6;
 			char c3 = static_cast<char>(0xF0 | (c & 0x07));
-			*array++ = c3;
-			*array++ = c2;
-			*array++ = c1;
-			*array++ = c0;
+			*i++ = c3;
+			*i++ = c2;
+			*i++ = c1;
+			*i++ = c0;
 			size = 4;
 		}
 		

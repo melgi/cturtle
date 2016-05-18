@@ -36,7 +36,7 @@ namespace turtle {
 				
 		// Compatibility Encoding Scheme for UTF-16: 8-Bit (CESU-8)
 		// (http://www.unicode.org/reports/tr26/)
-		template<typename T> static std::size_t cesu8Bytes(char32_t c, T array);
+		template<typename OutputIterator> static std::size_t cesu8Bytes(char32_t c, OutputIterator i);
 	};
 	
 	
@@ -73,13 +73,13 @@ namespace turtle {
 	
 	// Compatibility Encoding Scheme for UTF-16: 8-Bit (CESU-8)
 	// (http://www.unicode.org/reports/tr26/)
-	template<typename T> std::size_t utf16::cesu8Bytes(char32_t c, T array)
+	template<typename OutputIterator> std::size_t utf16::cesu8Bytes(char32_t c, OutputIterator i)
 	{
 		if (c <= 0xFFFF)
-			return utf8Bytes(c, array);
+			return utf8Bytes(c, i);
 			
-		utf8Bytes(hiSurrogate(c), array);
-		utf8Bytes(loSurrogate(c), array);
+		utf8Bytes(hiSurrogate(c), i);
+		utf8Bytes(loSurrogate(c), i);
 		
 		return 6;
 	}
