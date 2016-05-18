@@ -23,6 +23,7 @@
 #include "../src/Uri.hh"
 #include "../src/Parser.hh"
 #include "../src/NTriplesWriter.hh"
+#include "../src/Utf16.hh"
 #include "catch.hpp"
 
 
@@ -146,4 +147,12 @@ TEST_CASE("escaping", "[parser]")
 	turtle::URIResource &resource = dynamic_cast<turtle::URIResource &>(graph[0].subject());
 	
 	REQUIRE(resource.uri().find(expected) == resource.uri().length() - expected.length());
+}
+
+TEST_CASE("surrogate pair", "[utf-16]")
+{
+	char32_t c = 0x29154;
+	
+	REQUIRE(turtle::utf16::hiSurrogate(c) == 0xD864);
+	REQUIRE(turtle::utf16::loSurrogate(c) == 0xDD54);
 }

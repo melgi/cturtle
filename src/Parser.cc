@@ -16,6 +16,7 @@
 
 #include "Parser.hh"
 #include "Utf8.hh"
+#include "Utf16.hh"
 #include "Model.hh"
 
 namespace turtle {
@@ -359,18 +360,18 @@ namespace turtle {
 						std::string value = std::string(begin, i);
 						int v = std::stoi(value, nullptr, 16);
 							
-						if (isHighSurrogate(v)) {
+						if (utf16::isHighSurrogate(v)) {
 							if (highSurrogate)
 								throw ParseException("\"" + uriLiteral + "\" contains an unpaired surrogate");
 								
 							highSurrogate = v;
 						} else {
 						
-							if (isLowSurrogate(v)) {
+							if (utf16::isLowSurrogate(v)) {
 								if (!highSurrogate)
 									throw ParseException("\"" + uriLiteral + "\" contains an unpaired surrogate");
 									
-								v = convert(highSurrogate, v);
+								v = utf16::toChar(highSurrogate, v);
 								utf8Bytes(v, inserter);
 								highSurrogate = 0;
 							} else {
@@ -484,17 +485,17 @@ namespace turtle {
 						std::string value = stringLiteral.substr(begin, 4);
 						int v = std::stoi(value, nullptr, 16);
 						
-						if (isHighSurrogate(v)) {
+						if (utf16::isHighSurrogate(v)) {
 							if (highSurrogate)
 								throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
 								
 							highSurrogate = v;
 						} else {
-							if (isLowSurrogate(v)) {
+							if (utf16::isLowSurrogate(v)) {
 								if (!highSurrogate)
 									throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
 									
-								v = convert(highSurrogate, v);
+								v = utf16::toChar(highSurrogate, v);
 								utf8Bytes(v, std::back_inserter(buf));
 								highSurrogate = 0;
 							} else {
