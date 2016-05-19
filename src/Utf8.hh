@@ -63,23 +63,25 @@ namespace turtle {
 
 
 	template<typename InputIterator>
-	char32_t utf8Decode(InputIterator pos, InputIterator end)
+	std::size_t utf8Decode(char32_t &v, InputIterator pos, InputIterator end)
 	{
-		char32_t v;
+		std::size_t len = 0;
 		bool valid = true;
 		char c = *pos;
 		if ((c & 0x80) == 0) {
 			v = static_cast<char32_t>(c);
+			len++;
 		} else if ((c & 0xE0) == 0xC0) {
 			v = static_cast<char32_t>(c) & 0x1F;
+			len++;
 			if (++pos < end) {
 				c = *pos;
 				if ((c & 0xC0) == 0x80) {
 					v <<= 6;
 					v |= static_cast<char32_t>(c) & 0x3F;
+					len++;
 				} else {
 					valid = false;
-					--pos;
 				}
 			} else
 				valid = false;
@@ -88,15 +90,15 @@ namespace turtle {
 				valid = false;
 		} else if ((c & 0xF0) == 0xE0) {
 			v = static_cast<char32_t>(c) & 0x0F;
-			
+			len++;
 			if (++pos < end) {
 				c = *pos;
 				if ((c & 0xC0) == 0x80) {
 					v <<= 6;
 					v |= static_cast<char32_t>(c) & 0x3F;
+					len++;
 				} else {
 					valid = false;
-					--pos;
 				}
 			} else
 				valid = false;
@@ -106,9 +108,9 @@ namespace turtle {
 				if ((c & 0xC0) == 0x80) {
 					v <<= 6;
 					v |= static_cast<char32_t>(c) & 0x3F;
+					len++;
 				} else {
 					valid = false;
-					--pos;
 				}
 			} else
 				valid = false;
@@ -117,15 +119,15 @@ namespace turtle {
 				valid = false;
 		} else if ((c & 0xF8) == 0xF0) {
 			v = static_cast<char32_t>(c) & 0x07;
-			
+			len++;
 			if (valid && ++pos < end) {
 				c = *pos;
 				if ((c & 0xC0) == 0x80) {
 					v <<= 6;
 					v |= static_cast<char32_t>(c) & 0x3F;
+					len++;
 				} else {
 					valid = false;
-					--pos;
 				}
 			} else
 				valid = false;
@@ -135,9 +137,9 @@ namespace turtle {
 				if ((c & 0xC0) == 0x80) {
 					v <<= 6;
 					v |= static_cast<char32_t>(c) & 0x3F;
+					len++;
 				} else {
 					valid = false;
-					--pos;
 				}
 			} else
 				valid = false;
@@ -147,9 +149,9 @@ namespace turtle {
 				if ((c & 0xC0) == 0x80) {
 					v <<= 6;
 					v |= static_cast<char32_t>(c) & 0x3F;
+					len++;
 				} else {
 					valid = false;
-					--pos;
 				}
 			} else
 				valid = false;
@@ -159,12 +161,13 @@ namespace turtle {
 		} else {
 			v = 0xFFFD;
 			valid = false;
+			len++;
 		}
 		
 		if (!valid)
 			v = 0xFFFD;
 		
-		return v;
+		return len;
 	}
 
 }
