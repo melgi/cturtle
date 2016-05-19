@@ -155,4 +155,11 @@ TEST_CASE("surrogate pair", "[utf-16]")
 	
 	REQUIRE(turtle::utf16::hiSurrogate(c) == 0xD864);
 	REQUIRE(turtle::utf16::loSurrogate(c) == 0xDD54);
+	
+	std::string result;
+	std::string expected = "\xED\xA1\xA4\xED\xB5\x94";
+	
+	turtle::utf16::cesu8Bytes(c, std::back_inserter(result));
+
+	REQUIRE(result == expected);
 }

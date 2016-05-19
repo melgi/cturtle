@@ -77,7 +77,10 @@ namespace turtle {
 	{
 		if (c <= 0xFFFF)
 			return utf8Bytes(c, i);
-			
+		
+		if (c >= 0x0010FFFF)
+			return 0;
+		
 		utf8Bytes(hiSurrogate(c), i);
 		utf8Bytes(loSurrogate(c), i);
 		
