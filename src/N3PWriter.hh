@@ -27,6 +27,9 @@
 
 #ifdef _WIN32
 #	define CTURTLE_CRLF
+#   ifndef CTURTLE_N3P_UTF8
+#		define CTURTLE_N3P_CESU8
+#   endif
 #endif
 
 namespace turtle {
@@ -74,15 +77,15 @@ namespace turtle {
 						case '\'' : m_outbuf->sputc('\\'); m_outbuf->sputc('\'');                                               break;
 						case '\\' : m_outbuf->sputc('\\'); m_outbuf->sputc('\\'); m_outbuf->sputc('\\'); m_outbuf->sputc('\\'); break;
 						default   :
-#ifdef CTURTLE_CESU8
+#ifdef CTURTLE_N3P_CESU8
 							if ((c & 0xF8) == 0xF0) {
 								ouputCesu8(i, s.cend()); --i;
 							} else {
 								m_outbuf->sputc(c);
 							}
-#else /* !CTURTLE_CESU8 */
+#else /* !CTURTLE_N3P_CESU8 */
 							m_outbuf->sputc(c);		
-#endif
+#endif /* CTURTLE_N3P_CESU8 */
 					}
 				}
 			}
@@ -90,7 +93,7 @@ namespace turtle {
 		
 		void outputUri(const std::string &s)
 		{
-#ifdef CTURTLE_CESU8
+#ifdef CTURTLE_N3P_CESU8
 			for (auto i = s.cbegin(); i != s.cend(); i++) {
 				char c = *i;
 				if (c == '\'') {
@@ -104,7 +107,7 @@ namespace turtle {
 					}
 				}
 			}
-#else /* !CTURTLE_CESU8 */
+#else /* !CTURTLE_N3P_CESU8 */
 			if (s.find('\'') == std::string::npos) {
 				m_outbuf->sputn(s.c_str(), s.length());
 			} else {
@@ -118,12 +121,12 @@ namespace turtle {
 					}
 				}
 			}
-#endif /* CTURTLE_CESU8 */
+#endif /* CTURTLE_N3P_CESU8 */
 		}
 
 	private:
 	
-#ifdef CTURTLE_CESU8
+#ifdef CTURTLE_N3P_CESU8
 
 		template<typename Iterator> void ouputCesu8(Iterator &i, const Iterator &end)
 		{
@@ -139,7 +142,7 @@ namespace turtle {
 			utf16::encodeCESU8(cp, std::ostreambuf_iterator<std::streambuf::char_type>(m_outbuf));
 		}
 		
-#endif /* CTURTLE_CESU8 */
+#endif /* CTURTLE_N3P_CESU8 */
 	
 		void writeHex(char c)
 		{

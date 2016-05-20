@@ -69,7 +69,7 @@ namespace turtle {
 	
 	void N3PWriter::outputProperty(const std::string &uri)
 	{
-#ifdef CTURTLE_CESU8
+#ifdef CTURTLE_N3P_CESU8
 		m_outbuf->sputn(":- dynamic('<", 13); 
 		m_formatter.outputUri(uri);
 		m_outbuf->sputn(">'/2).", 6);
@@ -82,7 +82,7 @@ namespace turtle {
 		m_formatter.outputUri(uri);
 		m_outbuf->sputn(">').", 4);
 		endl();
-#else /* !CTURTLE_CESU8 */
+#else /* !CTURTLE_N3P_CESU8 */
 		if (uri.find('\'') == std::string::npos) {
 			m_outbuf->sputn(":- dynamic('<", 13); 
 			m_outbuf->sputn(uri.c_str(), uri.length());
@@ -110,7 +110,7 @@ namespace turtle {
 			m_outbuf->sputn(">').", 4);
 			endl();
 		}
-#endif /* CTURTLE_CESU8 */
+#endif /* CTURTLE_N3P_CESU8 */
 	}
 
 	inline void N3PWriter::outputTriple(const N3Node &subject, const URIResource &property, const N3Node &object)
