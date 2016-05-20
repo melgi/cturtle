@@ -21,7 +21,7 @@
 
 namespace turtle {
 	
-	struct utf16 {
+	namespace utf16 {
 	
 		static const uint16_t HiSurrogateStart = 0xD800;
 		static const uint16_t HiSurrogateEnd   = 0xDBFF;
@@ -36,9 +36,8 @@ namespace turtle {
 				
 		// Compatibility Encoding Scheme for UTF-16: 8-Bit (CESU-8)
 		// (http://www.unicode.org/reports/tr26/)
-		template<typename OutputIterator> static std::size_t cesu8Bytes(char32_t c, OutputIterator i);
+		template<typename OutputIterator> static std::size_t encodeCESU8(char32_t c, OutputIterator i);
 	};
-	
 	
 	inline bool utf16::isHighSurrogate(std::uint16_t i)
 	{
@@ -73,16 +72,16 @@ namespace turtle {
 	
 	// Compatibility Encoding Scheme for UTF-16: 8-Bit (CESU-8)
 	// (http://www.unicode.org/reports/tr26/)
-	template<typename OutputIterator> std::size_t utf16::cesu8Bytes(char32_t c, OutputIterator i)
+	template<typename OutputIterator> std::size_t utf16::encodeCESU8(char32_t c, OutputIterator i)
 	{
 		if (c <= 0xFFFF)
-			return utf8Bytes(c, i);
+			return utf8::encode(c, i);
 		
 		if (c >= 0x0010FFFF)
 			return 0;
 		
-		utf8Bytes(hiSurrogate(c), i);
-		utf8Bytes(loSurrogate(c), i);
+		utf8::encode(hiSurrogate(c), i);
+		utf8::encode(loSurrogate(c), i);
 		
 		return 6;
 	}

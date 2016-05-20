@@ -372,13 +372,13 @@ namespace turtle {
 									throw ParseException("\"" + uriLiteral + "\" contains an unpaired surrogate");
 									
 								v = utf16::toChar(highSurrogate, v);
-								utf8Bytes(v, inserter);
+								utf8::encode(v, inserter);
 								highSurrogate = 0;
 							} else {
 								if (v <= 0x20 || (v < 128 && INVALID_ESCAPES.find(std::string::traits_type::to_char_type(v)) != std::string::npos))
 									throw ParseException("\"" + uriLiteral + "\" contains illegal escape \"\\u" + value + "\"");
 								
-								utf8Bytes(v, inserter);
+								utf8::encode(v, inserter);
 							}
 						}
 						
@@ -393,7 +393,7 @@ namespace turtle {
 						int v = std::stoi(value, nullptr, 16);
 						if (v <= 0x20 || (v < 128 && INVALID_ESCAPES.find(std::string::traits_type::to_char_type(v)) != std::string::npos))
 							throw ParseException("\"" + uriLiteral + "\" contains illegal escape \"\\U" + value + "\"");
-						utf8Bytes(v, inserter);
+						utf8::encode(v, inserter);
 						break;
 					}
 					default  :
@@ -496,10 +496,10 @@ namespace turtle {
 									throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
 									
 								v = utf16::toChar(highSurrogate, v);
-								utf8Bytes(v, std::back_inserter(buf));
+								utf8::encode(v, std::back_inserter(buf));
 								highSurrogate = 0;
 							} else {
-								utf8Bytes(v, std::back_inserter(buf));
+								utf8::encode(v, std::back_inserter(buf));
 							}
 						}
 						break;
@@ -510,7 +510,7 @@ namespace turtle {
 						std::size_t begin = ++i; i += 7;
 						std::string value = stringLiteral.substr(begin, 8);
 						int v = std::stoi(value, nullptr, 16);
-						utf8Bytes(v, std::back_inserter(buf));
+						utf8::encode(v, std::back_inserter(buf));
 						break;
 					}
 				

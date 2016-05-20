@@ -159,7 +159,7 @@ TEST_CASE("surrogate pair", "[utf-16]")
 	std::string result;
 	std::string expected = "\xED\xA1\xA4\xED\xB5\x94";
 	
-	turtle::utf16::cesu8Bytes(c, std::back_inserter(result));
+	turtle::utf16::encodeCESU8(c, std::back_inserter(result));
 
 	REQUIRE(result == expected);
 }

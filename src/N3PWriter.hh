@@ -129,14 +129,14 @@ namespace turtle {
 		{
 			char32_t cp = 0;
 			if (end - i >= 4) {
-				std::size_t len = utf8Decode(cp, i, end);
+				std::size_t len = utf8::decode(cp, i, end);
 				i += len;
 			} else {
 				cp = 0xFFFD;
 				i++;
 			}
 			
-			utf16::cesu8Bytes(cp, std::ostreambuf_iterator<std::streambuf::char_type>(m_outbuf));
+			utf16::encodeCESU8(cp, std::ostreambuf_iterator<std::streambuf::char_type>(m_outbuf));
 		}
 		
 #endif /* CTURTLE_CESU8 */
