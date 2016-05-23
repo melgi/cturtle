@@ -79,7 +79,7 @@ namespace turtle {
 						default   :
 #ifdef CTURTLE_N3P_CESU8
 							if ((c & 0xF8) == 0xF0) {
-								ouputCesu8(i, s.cend()); --i;
+								i += ouputCesu8(i, s.cend()) - 1; 
 							} else {
 								m_outbuf->sputc(c);
 							}
@@ -94,14 +94,14 @@ namespace turtle {
 		void outputUri(const std::string &s)
 		{
 #ifdef CTURTLE_N3P_CESU8
-			for (auto i = s.cbegin(); i != s.cend(); i++) {
+			for (auto i = s.cbegin(); i != s.cend(); ++i) {
 				char c = *i;
 				if (c == '\'') {
 					m_outbuf->sputc('\\');
 					m_outbuf->sputc('\'');
 				} else {
 					if ((c & 0xF8) == 0xF0) {
-						ouputCesu8(i, s.cend()); --i;
+						i += ouputCesu8(i, s.cend()) - 1;
 					} else {
 						m_outbuf->sputc(c);
 					}
@@ -128,18 +128,26 @@ namespace turtle {
 	
 #ifdef CTURTLE_N3P_CESU8
 
-		template<typename Iterator> void ouputCesu8(Iterator &i, const Iterator &end)
+		template<typename Iterator> std::size_t ouputCesu8(const Iterator &i, const Iterator &end)
 		{
+			const char32_t REPLACEMENT_CHARACTER = 0xFFFD;
+			
 			char32_t cp = 0;
-			if (end - i >= 4) {
-				std::size_t len = utf8::decode(cp, i, end);
-				i += len;
-			} else {
-				cp = 0xFFFD;
-				i++;
+			
+			utf8::State state;
+			int r = utf8::decode(cp, i, end, state);
+			
+			if (r == -1) {
+				cp = REPLACEMENT_CHARACTER;
+				r  = 1;
+			} else if (r == -2) {
+				cp = REPLACEMENT_CHARACTER;
+				r  = end - i;
 			}
 			
 			utf16::encodeCESU8(cp, std::ostreambuf_iterator<std::streambuf::char_type>(m_outbuf));
+			
+			return r;
 		}
 		
 #endif /* CTURTLE_N3P_CESU8 */

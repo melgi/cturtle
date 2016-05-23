@@ -17,7 +17,6 @@
 #include <vector>
 #include <string>
 #include <ostream>
-#include <iostream>
 #include <sstream>
 
 #include "../src/Uri.hh"
@@ -161,5 +160,31 @@ TEST_CASE("surrogate pair", "[utf-16]")
 	
 	turtle::utf16::encodeCESU8(c, std::back_inserter(result));
 
+	REQUIRE(result == expected);
+}
+
+TEST_CASE("utf8", "[utf-8]")
+{
+	std::string input = u8"This contains \U00029154 and more \u00df\u6c34\U0001F34C.";
+	std::basic_string<char32_t> expected = U"This contains \U00029154 and more \u00df\u6c34\U0001F34C.";
+	std::basic_string<char32_t> result;
+	
+	turtle::utf8::State state;
+	auto i = input.cbegin();
+	
+	while (i < input.cend()) {
+		char32_t c;
+		int r = turtle::utf8::decode(c, i, input.cend(), state);
+		if (r == -1) {
+			c = 0xFFFD;
+			i++;
+		} else if (r != -2) {
+			i += r;
+		} else {
+			break; // fail
+		}
+		result.push_back(c);
+	}
+	
 	REQUIRE(result == expected);
 }

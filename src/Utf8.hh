@@ -17,6 +17,8 @@
 #ifndef N3_UTF8_HH
 #define N3_UTF8_HH
 
+#include <cstdint>
+
 namespace turtle {
 	
 	namespace utf8 {
@@ -25,17 +27,18 @@ namespace turtle {
 		std::size_t encode(char32_t c, OutputIterator i)
 		{
 			std::size_t size = 0;
+			
 			if (c <= 0x7F) {
 				*i++ = static_cast<char>(c);
 				size = 1;
-			} else if (0x0080 <= c && c <= 0x07FF) {
+			} else if (c <= 0x07FF) {
 				char c0 = static_cast<char>(0x80 | (c & 0x3F));
 				c >>= 6;
 				char c1 = static_cast<char>(0xC0 | (c & 0x1F));
 				*i++ = c1;
 				*i++ = c0;
 				size = 2;
-			} else if (0x0800 <= c && c <= 0xFFFF) {
+			} else if (c <= 0xFFFF) {
 				char c0 = static_cast<char>(0x80 | (c & 0x3F));
 				c >>= 6;
 				char c1 = static_cast<char>(0x80 | (c & 0x3F));
@@ -45,7 +48,7 @@ namespace turtle {
 				*i++ = c1;
 				*i++ = c0;
 				size = 3;
-			} else if (0x00010000 <= c && c <= 0x0010FFFF) {
+			} else if (c <= 0x0010FFFF) {
 				char c0 = static_cast<char>(0x80 | (c & 0x3F));
 				c >>= 6;
 				char c1 = static_cast<char>(0x80 | (c & 0x3F));
@@ -63,113 +66,61 @@ namespace turtle {
 			return size;
 		}
 
+		
+		
+		
 
+		// Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+		// See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
+		class Decoder {
+		
+			static const uint8_t m_type[];
+			static const uint8_t m_transition[];
+				
+		public:
+
+			static const uint32_t ACCEPT =  0;
+			static const uint32_t REJECT = 12;
+		
+			
+			static uint32_t decode(char32_t *codepoint, uint8_t byte, uint32_t *state)
+			{
+				uint32_t type = m_type[byte];
+
+				*codepoint = (*state != ACCEPT) ?
+					(byte & 0x3Fu) | (*codepoint << 6) :
+					(0xFF >> type) & (byte);
+
+				*state = m_transition[*state + type];
+				
+				return *state;
+			}
+		};
+		
+		class State {
+			char32_t m_codepoint;
+			uint32_t m_state;
+		public:
+			State() : m_codepoint(0), m_state(Decoder::ACCEPT) {}
+			
+			template<typename InputIterator> friend	std::size_t decode(char32_t &c32, InputIterator begin, InputIterator end, State &state);
+		};
+	
 		template<typename InputIterator>
-		std::size_t decode(char32_t &v, InputIterator pos, InputIterator end)
+		std::size_t decode(char32_t &c32, InputIterator begin, InputIterator end, State &state)
 		{
-			std::size_t len = 0;
-			bool valid = true;
-			char c = *pos;
-			if ((c & 0x80) == 0) {
-				v = static_cast<char32_t>(c);
-				len++;
-			} else if ((c & 0xE0) == 0xC0) {
-				v = static_cast<char32_t>(c) & 0x1F;
-				len++;
-				if (++pos < end) {
-					c = *pos;
-					if ((c & 0xC0) == 0x80) {
-						v <<= 6;
-						v |= static_cast<char32_t>(c) & 0x3F;
-						len++;
-					} else {
-						valid = false;
-					}
-				} else
-					valid = false;
+			InputIterator pos = begin;
 				
-				if (valid && v < 0x80)
-					valid = false;
-			} else if ((c & 0xF0) == 0xE0) {
-				v = static_cast<char32_t>(c) & 0x0F;
-				len++;
-				if (++pos < end) {
-					c = *pos;
-					if ((c & 0xC0) == 0x80) {
-						v <<= 6;
-						v |= static_cast<char32_t>(c) & 0x3F;
-						len++;
-					} else {
-						valid = false;
-					}
-				} else
-					valid = false;
-				
-				if (valid && ++pos < end) {
-					c = *pos;
-					if ((c & 0xC0) == 0x80) {
-						v <<= 6;
-						v |= static_cast<char32_t>(c) & 0x3F;
-						len++;
-					} else {
-						valid = false;
-					}
-				} else
-					valid = false;
-				
-				if (valid && v < 0x0800)
-					valid = false;
-			} else if ((c & 0xF8) == 0xF0) {
-				v = static_cast<char32_t>(c) & 0x07;
-				len++;
-				if (valid && ++pos < end) {
-					c = *pos;
-					if ((c & 0xC0) == 0x80) {
-						v <<= 6;
-						v |= static_cast<char32_t>(c) & 0x3F;
-						len++;
-					} else {
-						valid = false;
-					}
-				} else
-					valid = false;
-				
-				if (valid && ++pos < end) {
-					c = *pos;
-					if ((c & 0xC0) == 0x80) {
-						v <<= 6;
-						v |= static_cast<char32_t>(c) & 0x3F;
-						len++;
-					} else {
-						valid = false;
-					}
-				} else
-					valid = false;
-				
-				if (valid && ++pos < end) {
-					c = *pos;
-					if ((c & 0xC0) == 0x80) {
-						v <<= 6;
-						v |= static_cast<char32_t>(c) & 0x3F;
-						len++;
-					} else {
-						valid = false;
-					}
-				} else
-					valid = false;
-				
-				if (valid && v < 0x10000)
-					valid = false;
-			} else {
-				v = 0xFFFD;
-				valid = false;
-				len++;
+			while (pos < end) {
+				if (!Decoder::decode(&state.m_codepoint, *pos++, &state.m_state)) {
+					c32 = state.m_codepoint;
+					return pos - begin;
+				} else if (state.m_state == Decoder::REJECT) {
+					return -1;
+				}
 			}
 			
-			if (!valid)
-				v = 0xFFFD;
-			
-			return len;
+			return -2;
 		}
 		
 	}
