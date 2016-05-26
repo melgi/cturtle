@@ -98,24 +98,26 @@ namespace turtle {
 		};
 		
 		class State {
+		
 			char32_t m_codepoint;
 			uint32_t m_state;
+			
 		public:
 			State() : m_codepoint(0), m_state(Decoder::ACCEPT) {}
 			
-			template<typename InputIterator> friend	std::size_t decode(char32_t &c32, InputIterator begin, InputIterator end, State &state);
+			template<typename InputIterator> friend	std::size_t decode(char32_t *c32, InputIterator begin, InputIterator end, State *state);
 		};
 	
 		template<typename InputIterator>
-		std::size_t decode(char32_t &c32, InputIterator begin, InputIterator end, State &state)
+		std::size_t decode(char32_t *c32, InputIterator begin, InputIterator end, State *state)
 		{
 			InputIterator pos = begin;
 				
 			while (pos < end) {
-				if (!Decoder::decode(&state.m_codepoint, *pos++, &state.m_state)) {
-					c32 = state.m_codepoint;
+				if (!Decoder::decode(&state->m_codepoint, *pos++, &state->m_state)) {
+					*c32 = state->m_codepoint;
 					return pos - begin;
-				} else if (state.m_state == Decoder::REJECT) {
+				} else if (state->m_state == Decoder::REJECT) {
 					return -1;
 				}
 			}

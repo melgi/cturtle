@@ -130,12 +130,12 @@ namespace turtle {
 
 		template<typename Iterator> std::size_t ouputCesu8(const Iterator &i, const Iterator &end)
 		{
-			const char32_t REPLACEMENT_CHARACTER = 0xFFFD;
+			const char32_t REPLACEMENT_CHARACTER = U'\uFFFD';
 			
-			char32_t cp = 0;
+			char32_t cp;
 			
 			utf8::State state;
-			int r = utf8::decode(cp, i, end, state);
+			int r = utf8::decode(&cp, i, end, &state);
 			
 			if (r == -1) {
 				cp = REPLACEMENT_CHARACTER;

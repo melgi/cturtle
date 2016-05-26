@@ -23,30 +23,32 @@ namespace turtle {
 	
 	namespace utf16 {
 	
-		static const uint16_t HiSurrogateStart = 0xD800;
-		static const uint16_t HiSurrogateEnd   = 0xDBFF;
-		static const uint16_t LoSurrogateStart = 0xDC00;
-		static const uint16_t LoSurrogateEnd   = 0xDFFF;
+		const uint16_t HI_SURROGATE_START = 0xD800;
+		const uint16_t HI_SURROGATE_END   = 0xDBFF;
+		const uint16_t LO_SURROGATE_START = 0xDC00;
+		const uint16_t LO_SURROGATE_END   = 0xDFFF;
 		
-		static bool isHighSurrogate(std::uint16_t i);
-		static bool isLowSurrogate(std::uint16_t i);
-		static char32_t toChar(std::uint16_t high, std::uint16_t low);
-		static std::uint16_t hiSurrogate(char32_t c);
-		static std::uint16_t loSurrogate(char32_t c);
-				
+		const uint16_t SURROGATE_MASK     = 0xFC00;
+		
+		bool isHighSurrogate(std::uint16_t i);
+		bool isLowSurrogate(std::uint16_t i);
+		char32_t toChar(std::uint16_t high, std::uint16_t low);
+		std::uint16_t hiSurrogate(char32_t c);
+		std::uint16_t loSurrogate(char32_t c);
+		
 		// Compatibility Encoding Scheme for UTF-16: 8-Bit (CESU-8)
 		// (http://www.unicode.org/reports/tr26/)
-		template<typename OutputIterator> static std::size_t encodeCESU8(char32_t c, OutputIterator i);
+		template<typename OutputIterator> std::size_t encodeCESU8(char32_t c, OutputIterator i);
 	};
 	
 	inline bool utf16::isHighSurrogate(std::uint16_t i)
 	{
-		return HiSurrogateStart <= i && i <= HiSurrogateEnd;
+		return (i & SURROGATE_MASK) == HI_SURROGATE_START;
 	}
 	
 	inline bool utf16::isLowSurrogate(std::uint16_t i)
 	{
-		return LoSurrogateStart <= i && i <= LoSurrogateEnd;
+		return (i & SURROGATE_MASK) == LO_SURROGATE_START;
 	}
 	
 	inline char32_t utf16::toChar(std::uint16_t high, std::uint16_t low)
@@ -62,12 +64,12 @@ namespace turtle {
 		std::uint16_t n = static_cast<std::uint16_t>(c);
 		std::uint16_t m = static_cast<std::uint16_t>((c >> 16) & 0x1F) - 1;
 		
-		return HiSurrogateStart | (m << 6) | (n >> 10);
+		return HI_SURROGATE_START | (m << 6) | (n >> 10);
 	}
 	
 	inline std::uint16_t utf16::loSurrogate(char32_t c)
 	{
-		return LoSurrogateStart | (c & 0x3FF);
+		return LO_SURROGATE_START | (c & 0x3FF);
 	}
 	
 	// Compatibility Encoding Scheme for UTF-16: 8-Bit (CESU-8)

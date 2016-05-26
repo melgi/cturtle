@@ -23,6 +23,7 @@
 #include "../src/Parser.hh"
 #include "../src/NTriplesWriter.hh"
 #include "../src/Utf16.hh"
+
 #include "catch.hpp"
 
 
@@ -69,26 +70,26 @@ public:
 	turtle::N3Node      &object()   const { return *m_object;   }
 	
 	friend void swap(Triple& first, Triple& second)
-    {
+	{
 		std::swap(first.m_subject, second.m_subject);
-        std::swap(first.m_property, second.m_property);
+		std::swap(first.m_property, second.m_property);
 		std::swap(first.m_object, second.m_object);
-    }
+	}
 	
 };
 
 
 class TestSink : public turtle::TripleSink {
-				
+		
 		std::vector<Triple> m_triples;
 		
 public:
-
+		
 		TestSink() : m_triples()
 		{
 			// nop
 		}
-
+		
 		void start()
 		{
 			// nop
@@ -134,15 +135,15 @@ TEST_CASE("escaping", "[parser]")
 	turtle::Parser parser(&input, base, &handler);
 	parser.parse();
 	handler.end();
-
+	
 	REQUIRE(handler.count() == 1);
 	
 	const std::vector<Triple> &graph = handler.getResult();
 	
 	turtle::StringLiteral &literal = dynamic_cast<turtle::StringLiteral &>(graph[0].object());
-		
+	
 	REQUIRE(literal.lexical() == expected);
-
+	
 	turtle::URIResource &resource = dynamic_cast<turtle::URIResource &>(graph[0].subject());
 	
 	REQUIRE(resource.uri().find(expected) == resource.uri().length() - expected.length());
@@ -159,32 +160,37 @@ TEST_CASE("surrogate pair", "[utf-16]")
 	std::string expected = "\xED\xA1\xA4\xED\xB5\x94";
 	
 	turtle::utf16::encodeCESU8(c, std::back_inserter(result));
-
+	
 	REQUIRE(result == expected);
 }
 
 TEST_CASE("utf8", "[utf-8]")
 {
+	const char32_t REPLACEMENT_CHARACTER = U'\uFFFD';
+	
 	std::string input = u8"This contains \U00029154 and more \u00df\u6c34\U0001F34C.";
-	std::basic_string<char32_t> expected = U"This contains \U00029154 and more \u00df\u6c34\U0001F34C.";
-	std::basic_string<char32_t> result;
+	std::u32string expected = U"This contains \U00029154 and more \u00df\u6c34\U0001F34C.";
+	std::u32string result;
 	
 	turtle::utf8::State state;
+	
+	bool fail = false;
 	auto i = input.cbegin();
 	
-	while (i < input.cend()) {
+	while (i < input.cend() && !fail) {
 		char32_t c;
-		int r = turtle::utf8::decode(c, i, input.cend(), state);
+		int r = turtle::utf8::decode(&c, i, input.cend(), &state);
 		if (r == -1) {
-			c = 0xFFFD;
+			c = REPLACEMENT_CHARACTER;
 			i++;
 		} else if (r != -2) {
 			i += r;
 		} else {
-			break; // fail
+			fail = true;
 		}
 		result.push_back(c);
 	}
-	
+
+	REQUIRE(!fail);
 	REQUIRE(result == expected);
 }
