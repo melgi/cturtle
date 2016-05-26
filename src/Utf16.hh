@@ -33,8 +33,8 @@ namespace turtle {
 		bool isHighSurrogate(std::uint16_t i);
 		bool isLowSurrogate(std::uint16_t i);
 		char32_t toChar(std::uint16_t high, std::uint16_t low);
-		std::uint16_t hiSurrogate(char32_t c);
-		std::uint16_t loSurrogate(char32_t c);
+		std::uint16_t highSurrogate(char32_t c);
+		std::uint16_t lowSurrogate(char32_t c);
 		
 		// Compatibility Encoding Scheme for UTF-16: 8-Bit (CESU-8)
 		// (http://www.unicode.org/reports/tr26/)
@@ -59,15 +59,15 @@ namespace turtle {
 		return (m + 1) << 16 | n;
 	}
 	
-	inline std::uint16_t utf16::hiSurrogate(char32_t c)
+	inline std::uint16_t utf16::highSurrogate(char32_t c)
 	{
 		std::uint16_t n = static_cast<std::uint16_t>(c);
-		std::uint16_t m = static_cast<std::uint16_t>((c >> 16) & 0x1F) - 1;
+		std::uint16_t m = static_cast<std::uint16_t>((c >> 16) & 0x001F) - 1;
 		
 		return HI_SURROGATE_START | (m << 6) | (n >> 10);
 	}
 	
-	inline std::uint16_t utf16::loSurrogate(char32_t c)
+	inline std::uint16_t utf16::lowSurrogate(char32_t c)
 	{
 		return LO_SURROGATE_START | (c & 0x3FF);
 	}
@@ -82,8 +82,8 @@ namespace turtle {
 		if (c >= 0x0010FFFF)
 			return 0;
 		
-		utf8::encode(hiSurrogate(c), i);
-		utf8::encode(loSurrogate(c), i);
+		utf8::encode(highSurrogate(c), i);
+		utf8::encode(lowSurrogate(c), i);
 		
 		return 6;
 	}
