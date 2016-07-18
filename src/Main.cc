@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 		std::cerr << "cturtle version " << CTURTLE_VERSION_STR << std::endl;
 		std::cerr << "\nUsage: cturtle [-b=base-uri] [-o=output-file] [-f=(nt|n3p|n3p-rdiv)] [input-files]" << std::endl;
 		
-		return -1;
+		return opt.error ? -1 : 0;
 	}
 	
 	std::unique_ptr<std::ostream> out;
