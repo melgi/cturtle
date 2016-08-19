@@ -105,15 +105,15 @@ namespace turtle {
 		
 	};
 	
-	inline bool operator==(const URIResource &u, const URIResource &v)
-	{
-		return u.uri() == v.uri();
-	}
-	
-	inline bool operator<(const URIResource &u, const URIResource &v)
-	{
-		return u.uri() < v.uri();
-	}
+//	inline bool operator==(const URIResource &u, const URIResource &v)
+//	{
+//		return u.uri() == v.uri();
+//	}
+//	
+//	inline bool operator<(const URIResource &u, const URIResource &v)
+//	{
+//		return u.uri() < v.uri();
+//	}
 	
 	class BlankNode : public Resource {
 		std::string m_id;
@@ -140,15 +140,15 @@ namespace turtle {
 		}
 	};
 	
-	inline bool operator==(const BlankNode &a, const BlankNode &b)
-	{
-		return a.id() == b.id();
-	}
-	
-	inline bool operator<(const BlankNode &a, const BlankNode &b)
-	{
-		return a.id() < b.id();
-	}
+//	inline bool operator==(const BlankNode &a, const BlankNode &b)
+//	{
+//		return a.id() == b.id();
+//	}
+//	
+//	inline bool operator<(const BlankNode &a, const BlankNode &b)
+//	{
+//		return a.id() < b.id();
+//	}
 
 	class RDFList : public Resource {
 		std::vector<N3Node *> m_elements;
@@ -313,15 +313,15 @@ namespace turtle {
 		}
 	};
 	
-	inline bool operator==(const BooleanLiteral &u, const BooleanLiteral &v)
-	{
-		return u.value() == v.value();
-	}
-	
-	inline bool operator<(const BooleanLiteral &u, const BooleanLiteral &v)
-	{
-		return u.value() < v.value();
-	}
+//	inline bool operator==(const BooleanLiteral &u, const BooleanLiteral &v)
+//	{
+//		return u.value() == v.value();
+//	}
+//	
+//	inline bool operator<(const BooleanLiteral &u, const BooleanLiteral &v)
+//	{
+//		return u.value() < v.value();
+//	}
 
 	class IntegerLiteral : public Literal {
 	public:
@@ -426,21 +426,21 @@ namespace turtle {
 		}
 	};
 	
-	inline bool operator==(const StringLiteral &u, const StringLiteral &v)
-	{
-		return u.lexical() == v.lexical() && u.language() == v.language();
-	}
-	
-	inline bool operator<(const StringLiteral &u, const StringLiteral &v)
-	{
-		int cmp = u.language().compare(v.language());
-		if (cmp < 0)
-			return true;
-		if (cmp > 0);
-			return false;
-		
-		return u.lexical() < v.lexical();
-	}
+//	inline bool operator==(const StringLiteral &u, const StringLiteral &v)
+//	{
+//		return u.lexical() == v.lexical() && u.language() == v.language();
+//	}
+//	
+//	inline bool operator<(const StringLiteral &u, const StringLiteral &v)
+//	{
+//		int cmp = u.language().compare(v.language());
+//		if (cmp < 0)
+//			return true;
+//		if (cmp > 0)
+//			return false;
+//		
+//		return u.lexical() < v.lexical();
+//	}
 
 	class OtherLiteral : public Literal { /* keeps a copy of the type uri */
 		
