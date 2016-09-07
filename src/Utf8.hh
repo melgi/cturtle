@@ -18,6 +18,7 @@
 #define N3_UTF8_HH
 
 #include <cstdint>
+#include <cstddef>
 
 namespace turtle {
 	
