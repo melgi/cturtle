@@ -17,6 +17,8 @@
 #ifndef N3_UTF16_HH
 #define N3_UTF16_HH
 
+#include <cstddef>
+
 #include "Utf8.hh"
 
 namespace turtle {

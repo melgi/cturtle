@@ -16,6 +16,7 @@
 
 #include "NTriplesWriter.hh"
 
+#include <cstddef>
 #include <utility> // std::move
 
 namespace turtle {

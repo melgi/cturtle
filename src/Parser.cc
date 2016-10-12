@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#include <utility>
+
 #include "Parser.hh"
 #include "Utf8.hh"
 #include "Utf16.hh"
@@ -29,6 +31,15 @@ namespace turtle {
 	inline Uri Parser::resolve(const std::string &uri)
 	{
 		Uri u(uri);
+		if (u.absolute())
+			return u;
+		
+		return m_base.resolve(u);
+	}
+
+	inline Uri Parser::resolve(std::string &&uri)
+	{
+		Uri u(std::move(uri));
 		if (u.absolute())
 			return u;
 		
@@ -82,7 +93,7 @@ namespace turtle {
 		std::string u = extractUri(m_lexeme);
 		match('.');
 		
-		m_base = resolve(u);
+		m_base = resolve(std::move(u));
 	}
 
 	void Parser::prefixID()
@@ -94,7 +105,7 @@ namespace turtle {
 		std::string u = extractUri(m_lexeme);
 		match('.');
 		
-		std::string ns = static_cast<std::string>(resolve(u));
+		std::string ns = static_cast<std::string>(resolve(std::move(u)));
 		m_sink->prefix(prefix, ns);
 		m_prefixMap[prefix] = ns;
 	}
@@ -106,7 +117,7 @@ namespace turtle {
 		
 		std::string u = extractUri(m_lexeme);
 		
-		m_base = resolve(u);
+		m_base = resolve(std::move(u));
 	}
 
 	void Parser::sparqlPrefix()
@@ -117,7 +128,7 @@ namespace turtle {
 		match(Token::IriRef);
 		std::string u = extractUri(m_lexeme);
 		
-		std::string ns = static_cast<std::string>(resolve(u));
+		std::string ns = static_cast<std::string>(resolve(std::move(u)));
 		m_sink->prefix(prefix, ns);
 		m_prefixMap[prefix] = ns;
 	}
@@ -135,8 +146,7 @@ namespace turtle {
 	std::unique_ptr<Resource> Parser::subject()
 	{
 		if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
-			std::string uri = iri();
-			return std::unique_ptr<Resource>(new URIResource(uri));
+			return std::unique_ptr<Resource>(new URIResource(iri()));
 		} else if (m_lookAhead == Token::BlankNodeLabel) {
 			match(Token::BlankNodeLabel);
 			return std::unique_ptr<Resource>(new BlankNode(m_blanks.generate(m_lexeme.substr(2))));
@@ -166,8 +176,7 @@ namespace turtle {
 			match('a');
 			objectlist(subject, &RDF::type);
 		} else if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
-			std::string u = iri();
-			URIResource property(u);
+			URIResource property(iri());
 			objectlist(subject, &property);
 		} else
 			throw ParseException("expected 'a' or uri as property", line());
@@ -177,8 +186,7 @@ namespace turtle {
 	{
 		if (m_lookAhead == Token::IriRef) {
 			match(Token::IriRef);
-			std::string uri = extractUri(m_lexeme);
-			return static_cast<std::string>(resolve(uri));
+			return static_cast<std::string>(resolve(extractUri(m_lexeme)));
 		} else if (m_lookAhead == Token::PNameLN) {
 			match(Token::PNameLN);
 			return toUri(m_lexeme);
@@ -213,8 +221,7 @@ namespace turtle {
 			match(Token::BlankNodeLabel);
 			return std::unique_ptr<N3Node>(new BlankNode(m_blanks.generate(m_lexeme.substr(2))));
 		} else if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
-			std::string u = iri();
-			return std::unique_ptr<N3Node>(new URIResource(u));
+			return std::unique_ptr<N3Node>(new URIResource(iri()));
 		} else if (m_lookAhead == Token::StringLiteralQuote) {
 			match(Token::StringLiteralQuote);
 			std::string lexicalValue = extractString(m_lexeme);
@@ -307,7 +314,7 @@ namespace turtle {
 	}
 	
 	
-	std::string Parser::unescape(std::size_t start, const std::string  &localName)
+	std::string Parser::unescape(std::size_t start, const std::string &localName)
 	{
 		std::size_t end = localName.length();
 		
@@ -442,7 +449,7 @@ namespace turtle {
 				
 				if (highSurrogate && c != 'u')
 					throw ParseException("\"" + stringLiteral + "\" contains an unpaired surrogate");
-					
+				
 				switch (c) {
 					case 'n' : buf.push_back('\n'); break;
 					case 'r' : buf.push_back('\r'); break;
@@ -483,7 +490,7 @@ namespace turtle {
 						utf8::encode(v, std::back_inserter(buf));
 						break;
 					}
-				
+					
 					default  :
 						throw ParseException(stringLiteral + " contains \"\\" + c + "\"");
 				}

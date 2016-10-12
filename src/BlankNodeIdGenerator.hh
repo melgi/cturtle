@@ -17,6 +17,7 @@
 #ifndef N3_BLANKNODEIDGENERATOR_HH
 #define N3_BLANKNODEIDGENERATOR_HH
 
+#include <cstddef>
 #include <string>
 
 namespace turtle {

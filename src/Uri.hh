@@ -17,9 +17,11 @@
 #ifndef N3_URI_HH
 #define N3_URI_HH
 
+#include <cstddef>
 #include <string>
 #include <ostream>
 #include <stdexcept>
+#include <utility>
 
 #include "Optional.hh"
 
@@ -104,6 +106,18 @@ namespace turtle {
 	
 		Uri(const std::string &value)
 			: m_value(value),
+			  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
+			  m_authority(std::string::npos), m_authorityLength(std::string::npos),
+			  m_host(std::string::npos),      m_hostLength(std::string::npos),
+			  m_path(std::string::npos),      m_pathLength(std::string::npos),
+			  m_query(std::string::npos),     m_queryLength(std::string::npos),
+			  m_fragment(std::string::npos)
+		{
+			parseComponents();
+		}
+		
+		Uri(std::string &&value)
+			: m_value(std::move(value)),
 			  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
 			  m_authority(std::string::npos), m_authorityLength(std::string::npos),
 			  m_host(std::string::npos),      m_hostLength(std::string::npos),

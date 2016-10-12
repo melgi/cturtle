@@ -17,11 +17,12 @@
 #ifndef N3_PARSER_H
 #define N3_PARSER_H
 
-
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <stdexcept>
 #include <FlexLexer.h>
+
 #include "Uri.hh"
 #include "Token.hh"
 #include "Model.hh"
@@ -127,6 +128,7 @@ namespace turtle {
 		}
 		
 		Uri resolve(const std::string &uri);
+		Uri resolve(std::string &&uri);
 		std::string toUri(const std::string &pname) const;
 		
 		void turtledoc();
@@ -146,7 +148,7 @@ namespace turtle {
 		std::unique_ptr<BlankNode> blanknodepropertylist();
 		void propertylistopt(const Resource *subject);
 		
-		static std::string unescape(std::size_t start, const std::string  &localName);
+		static std::string unescape(std::size_t start, const std::string &localName);
 		static std::string extractUri(const std::string &uriLiteral);
 		static std::string extractString(const std::string &stringLiteral);
 		

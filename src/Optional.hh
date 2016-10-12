@@ -19,6 +19,7 @@
 
 
 #include <stdexcept>
+#include <utility>
 
 namespace turtle {
 
@@ -38,8 +39,9 @@ namespace turtle {
 		
 		static const Optional<T> none;
 		
-		Optional()               : m_value(T()),   m_present(false) {}
-		Optional(const T &value) : m_value(value), m_present(true)  {}
+		Optional()               : m_value(T()),              m_present(false) {}
+		Optional(const T &value) : m_value(value),            m_present(true)  {}
+		Optional(T &&value)      : m_value(std::move(value)), m_present(true)  {}
 		
 		operator bool() const        { return m_present; }
 		

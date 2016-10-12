@@ -17,11 +17,13 @@
 #ifndef N3_MODEL_HH
 #define N3_MODEL_HH
 
+#include <cstddef>
 #include <string>
 #include <ostream>
 #include <vector>
 
 #include <utility> // std::move
+
 
 namespace turtle {
 
@@ -83,6 +85,7 @@ namespace turtle {
 		std::string m_uri;
 	public:
 		explicit URIResource(const std::string &uri) : Resource(), m_uri(uri) {}
+		explicit URIResource(std::string &&uri)      : Resource(), m_uri(std::move(uri)) {}
 		
 		const std::string &uri() const { return m_uri; }
 		
@@ -104,21 +107,13 @@ namespace turtle {
 		}
 		
 	};
-	
-//	inline bool operator==(const URIResource &u, const URIResource &v)
-//	{
-//		return u.uri() == v.uri();
-//	}
-//	
-//	inline bool operator<(const URIResource &u, const URIResource &v)
-//	{
-//		return u.uri() < v.uri();
-//	}
+
 	
 	class BlankNode : public Resource {
 		std::string m_id;
 	public:
 		explicit BlankNode(const std::string &id) : Resource(), m_id(id) {}
+		explicit BlankNode(std::string &&id)      : Resource(), m_id(std::move(id)) {}
 		
 		const std::string &id() const { return m_id; }
 		
@@ -140,15 +135,6 @@ namespace turtle {
 		}
 	};
 	
-//	inline bool operator==(const BlankNode &a, const BlankNode &b)
-//	{
-//		return a.id() == b.id();
-//	}
-//	
-//	inline bool operator<(const BlankNode &a, const BlankNode &b)
-//	{
-//		return a.id() < b.id();
-//	}
 
 	class RDFList : public Resource {
 		std::vector<N3Node *> m_elements;
@@ -312,16 +298,6 @@ namespace turtle {
 			visitor.visit(*this);
 		}
 	};
-	
-//	inline bool operator==(const BooleanLiteral &u, const BooleanLiteral &v)
-//	{
-//		return u.value() == v.value();
-//	}
-//	
-//	inline bool operator<(const BooleanLiteral &u, const BooleanLiteral &v)
-//	{
-//		return u.value() < v.value();
-//	}
 
 	class IntegerLiteral : public Literal {
 	public:
@@ -426,22 +402,6 @@ namespace turtle {
 		}
 	};
 	
-//	inline bool operator==(const StringLiteral &u, const StringLiteral &v)
-//	{
-//		return u.lexical() == v.lexical() && u.language() == v.language();
-//	}
-//	
-//	inline bool operator<(const StringLiteral &u, const StringLiteral &v)
-//	{
-//		int cmp = u.language().compare(v.language());
-//		if (cmp < 0)
-//			return true;
-//		if (cmp > 0)
-//			return false;
-//		
-//		return u.lexical() < v.lexical();
-//	}
-
 	class OtherLiteral : public Literal { /* keeps a copy of the type uri */
 		
 		std::string m_datatype_copy;

@@ -17,6 +17,7 @@
 #ifndef N3_N3PWRITER_HH
 #define N3_N3PWRITER_HH
 
+#include <cstddef>
 #include <unordered_set>
 #include <ostream>
 #include <iterator>
@@ -27,9 +28,9 @@
 
 #ifdef _WIN32
 #	define CTURTLE_CRLF
-#   ifndef CTURTLE_N3P_UTF8
+#	ifndef CTURTLE_N3P_UTF8
 #		define CTURTLE_N3P_CESU8
-#   endif
+#	endif
 #endif
 
 namespace turtle {
