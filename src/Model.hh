@@ -24,6 +24,7 @@
 
 #include <utility> // std::move
 
+#include <iostream>
 
 namespace turtle {
 
@@ -254,6 +255,7 @@ namespace turtle {
 		const std::string *m_datatype;
 		
 		Literal(const std::string &lexical, const std::string *datatype) : N3Node(), m_lexical(lexical), m_datatype(datatype) {}
+		Literal(std::string &&lexical, const std::string *datatype)      : N3Node(), m_lexical(std::move(lexical)), m_datatype(datatype) {}
 		
 	public:
 		
@@ -378,6 +380,7 @@ namespace turtle {
 		static const std::string TYPE;
 		
 		explicit StringLiteral(const std::string &value, const std::string &language = std::string()) : Literal(value, &TYPE), m_language(language) {}
+		explicit StringLiteral(std::string &&value, std::string &&language = std::string()) : Literal(std::move(value), &TYPE), m_language(std::move(language)) {}
 		
 		const std::string &language() const { return m_language; }
 		
@@ -409,6 +412,11 @@ namespace turtle {
 	public:
 		
 		explicit OtherLiteral(const std::string &value, const std::string &datatype) : Literal(value, nullptr), m_datatype_copy(datatype)
+		{
+			m_datatype = &m_datatype_copy;
+		}
+
+		explicit OtherLiteral(std::string &&value, std::string &&datatype) : Literal(std::move(value), nullptr), m_datatype_copy(std::move(datatype))
 		{
 			m_datatype = &m_datatype_copy;
 		}

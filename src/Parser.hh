@@ -126,6 +126,12 @@ namespace turtle {
 			else
 				throw ParseException("expected different symbol");
 		}
+
+		void match()
+		{
+			m_lexeme.assign(m_lexer.YYText(), m_lexer.YYLeng());
+			m_lookAhead = nextToken();
+		}
 		
 		Uri resolve(const std::string &uri);
 		Uri resolve(std::string &&uri);
@@ -143,7 +149,7 @@ namespace turtle {
 		std::string iri();
 		void objectlist(const Resource *subject, const URIResource *property);
 		std::unique_ptr<N3Node> object();
-		std::unique_ptr<Literal> dtlang(const std::string &lexicalValue);
+		std::unique_ptr<Literal> dtlang(std::string &&lexicalValue);
 		std::unique_ptr<RDFList> collection();
 		std::unique_ptr<BlankNode> blanknodepropertylist();
 		void propertylistopt(const Resource *subject);

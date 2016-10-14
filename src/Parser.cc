@@ -148,7 +148,7 @@ namespace turtle {
 		if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
 			return std::unique_ptr<Resource>(new URIResource(iri()));
 		} else if (m_lookAhead == Token::BlankNodeLabel) {
-			match(Token::BlankNodeLabel);
+			match();
 			return std::unique_ptr<Resource>(new BlankNode(m_blanks.generate(m_lexeme.substr(2))));
 		} else if (m_lookAhead == '(') { 
 			return collection();
@@ -161,7 +161,7 @@ namespace turtle {
 		if (m_lookAhead == 'a' || m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
 			property(subject);
 			while (m_lookAhead == ';') {
-				match(';');
+				match();
 				if (m_lookAhead == 'a' || m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
 					property(subject);
 				}
@@ -173,7 +173,7 @@ namespace turtle {
 	void Parser::property(const Resource *subject)
 	{
 		if (m_lookAhead == 'a') {
-			match('a');
+			match();
 			objectlist(subject, &RDF::type);
 		} else if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
 			URIResource property(iri());
@@ -185,13 +185,13 @@ namespace turtle {
 	std::string Parser::iri()
 	{
 		if (m_lookAhead == Token::IriRef) {
-			match(Token::IriRef);
+			match();
 			return static_cast<std::string>(resolve(extractUri(m_lexeme)));
 		} else if (m_lookAhead == Token::PNameLN) {
-			match(Token::PNameLN);
+			match();
 			return toUri(m_lexeme);
 		} else if (m_lookAhead == Token::PNameNS) {
-			match(Token::PNameNS);
+			match();
 			return toUri(m_lexeme);
 		} else
 			throw ParseException("expected IRI ref or prefixed name", line());
@@ -203,7 +203,7 @@ namespace turtle {
 			std::unique_ptr<N3Node> obj = object();
 			m_sink->triple(*subject, *property, *obj);
 			while (m_lookAhead == ',') {
-				match(',');
+				match();
 				if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::BlankNodeLabel || m_lookAhead == Token::PNameNS || m_lookAhead == '[' || m_lookAhead == '(' || m_lookAhead == Token::StringLiteralQuote || m_lookAhead == Token::StringLiteralSingleQuote || m_lookAhead == Token::StringLiteralLongSingleQuote || m_lookAhead == Token::StringLiteralLongQuote || m_lookAhead == Token::True || m_lookAhead == Token::False || m_lookAhead == Token::Integer || m_lookAhead == Token::Decimal || m_lookAhead == Token::Double) {
 					std::unique_ptr<N3Node> obj = object();
 					m_sink->triple(*subject, *property, *obj);
@@ -218,58 +218,54 @@ namespace turtle {
 	std::unique_ptr<N3Node> Parser::object()
 	{
 		if (m_lookAhead == Token::BlankNodeLabel) {
-			match(Token::BlankNodeLabel);
+			match();
 			return std::unique_ptr<N3Node>(new BlankNode(m_blanks.generate(m_lexeme.substr(2))));
 		} else if (m_lookAhead == Token::PNameLN || m_lookAhead == Token::IriRef || m_lookAhead == Token::PNameNS) {
 			return std::unique_ptr<N3Node>(new URIResource(iri()));
 		} else if (m_lookAhead == Token::StringLiteralQuote) {
-			match(Token::StringLiteralQuote);
-			std::string lexicalValue = extractString(m_lexeme);
-			return dtlang(lexicalValue);
+			match();
+			return dtlang(extractString(m_lexeme));
 		} else if (m_lookAhead == Token::StringLiteralLongQuote) {
-			match(Token::StringLiteralLongQuote);
-			std::string lexicalValue = extractString(m_lexeme);
-			return dtlang(lexicalValue);
+			match();
+			return dtlang(extractString(m_lexeme));
 		} else if (m_lookAhead == Token::Integer) {
-			match(Token::Integer);
+			match();
 			return std::unique_ptr<Literal>(new IntegerLiteral(m_lexeme));
 		} else if (m_lookAhead == Token::Decimal) {
-			match(Token::Decimal);
+			match();
 			return std::unique_ptr<Literal>(new DecimalLiteral(m_lexeme));
 		} else if (m_lookAhead == Token::Double) {
-			match(Token::Double);
+			match();
 			return std::unique_ptr<Literal>(new DoubleLiteral(m_lexeme));
 		} else if (m_lookAhead == Token::True) {
-			match(Token::True);
+			match();
 			return std::unique_ptr<Literal>(new BooleanLiteral(m_lexeme));
 		} else if (m_lookAhead == Token::False) {
-			match(Token::False);
+			match();
 			return std::unique_ptr<Literal>(new BooleanLiteral(m_lexeme));
 		} else if (m_lookAhead == '[') {
 			return blanknodepropertylist();
 		} else if (m_lookAhead == '(') {
 			return collection();
 		} else if (m_lookAhead == Token::StringLiteralSingleQuote) {
-			match(Token::StringLiteralSingleQuote);
-			std::string lexicalValue = extractString(m_lexeme);
-			return dtlang(lexicalValue);
+			match();
+			return dtlang(extractString(m_lexeme));
 		} else if (m_lookAhead == Token::StringLiteralLongSingleQuote) {
-			match(Token::StringLiteralLongSingleQuote);
-			std::string lexicalValue = extractString(m_lexeme);
-			return dtlang(lexicalValue);
+			match();
+			return dtlang(extractString(m_lexeme));
 		} else {
 			throw ParseException("expected blank node, iri, literal or list", line());
 		}
 	}
 	
-	std::unique_ptr<Literal> Parser::dtlang(const std::string &lexicalValue)
+	std::unique_ptr<Literal> Parser::dtlang(std::string &&lexicalValue)
 	{
 		if (m_lookAhead == Token::LangTag) {
-			match(Token::LangTag);
-			return std::unique_ptr<Literal>(new StringLiteral(lexicalValue, m_lexeme.substr(1)));
+			match();
+			return std::unique_ptr<Literal>(new StringLiteral(std::move(lexicalValue), m_lexeme.substr(1)));
 		} else if (m_lookAhead == Token::CaretCaret) {
-			match(Token::CaretCaret);
-			const std::string type = iri();
+			match();
+			std::string type = iri();
 			if (type == IntegerLiteral::TYPE)
 				return std::unique_ptr<Literal>(new IntegerLiteral(lexicalValue)); //TODO valid check
 			if (type == DecimalLiteral::TYPE)
@@ -279,12 +275,12 @@ namespace turtle {
 			if (type == DoubleLiteral::TYPE)
 				return std::unique_ptr<Literal>(new DoubleLiteral(lexicalValue));
 			if (type == StringLiteral::TYPE)
-				return std::unique_ptr<Literal>(new StringLiteral(lexicalValue));
+				return std::unique_ptr<Literal>(new StringLiteral(std::move(lexicalValue)));
 			
-			return std::unique_ptr<Literal>(new OtherLiteral(lexicalValue, type));
+			return std::unique_ptr<Literal>(new OtherLiteral(std::move(lexicalValue), std::move(type)));
 		}
 		
-		return std::unique_ptr<Literal>(new StringLiteral(lexicalValue));
+		return std::unique_ptr<Literal>(new StringLiteral(std::move(lexicalValue)));
 	}
 
 	std::unique_ptr<RDFList> Parser::collection()
