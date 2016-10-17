@@ -38,13 +38,8 @@ namespace turtle {
 
 	template<typename T>
 	struct Cloneable {
-		Cloneable() = default;
-		Cloneable(const Cloneable &c) = default;
-		Cloneable(Cloneable &&c) = default;
-		Cloneable &operator=(const Cloneable &c) = default;
-		Cloneable &operator=(Cloneable &&c) = default;
 		virtual T *clone() const = 0;
-		virtual ~Cloneable() = default;
+		virtual ~Cloneable() {};
 	};
 
 	struct N3NodeVisitor {
@@ -61,22 +56,14 @@ namespace turtle {
 	};
 
 	struct N3Node : public Cloneable<N3Node> {
-		/*N3Node() = default;
-		N3Node(const N3Node &c) = default;
-		N3Node(N3Node &&c) = default;
-		N3Node &operator=(const N3Node &c) = default;
-		N3Node &operator=(N3Node &&c) = default;*/
 		virtual std::ostream &print(std::ostream &out) const = 0;
 		virtual void visit(N3NodeVisitor &visitor) const = 0;
-		//virtual ~N3Node() = default;
 	};
 
 	std::ostream &operator<<(std::ostream &out, const N3Node &n);
 
 	struct Resource : public N3Node {
-	
 		virtual Resource *clone() const = 0;
-	
 	};
 
 
@@ -164,7 +151,7 @@ namespace turtle {
 			return *this;
 		}
 		
-		RDFList& operator=(RDFList &&list) // TODO correct?
+		RDFList& operator=(RDFList &&list)
 		{
 			std::swap(list.m_elements, m_elements);
 			
@@ -413,7 +400,7 @@ namespace turtle {
 		{
 			m_datatype = &m_datatype_copy;
 		}
-
+		
 		explicit OtherLiteral(std::string &&value, std::string &&datatype) : Literal(std::move(value), nullptr), m_datatype_copy(std::move(datatype))
 		{
 			m_datatype = &m_datatype_copy;
@@ -424,7 +411,7 @@ namespace turtle {
 			m_datatype = &m_datatype_copy;
 		}
 		
-		OtherLiteral(OtherLiteral &&other) : Literal(other.m_lexical, nullptr), m_datatype_copy(other.m_datatype_copy)
+		OtherLiteral(OtherLiteral &&other) : Literal(std::move(other.m_lexical), nullptr), m_datatype_copy(std::move(other.m_datatype_copy))
 		{
 			m_datatype = &m_datatype_copy;
 		}
@@ -432,7 +419,7 @@ namespace turtle {
 		OtherLiteral& operator=(OtherLiteral other)
 		{
 			std::swap(m_lexical, other.m_lexical);
-			std::swap(m_datatype, other.m_datatype);
+			std::swap(m_datatype_copy, other.m_datatype_copy);
 			
 			m_datatype = &m_datatype_copy;
 			
@@ -442,7 +429,7 @@ namespace turtle {
 		OtherLiteral& operator=(OtherLiteral &&other)
 		{
 			std::swap(m_lexical, other.m_lexical);
-			std::swap(m_datatype, other.m_datatype);
+			std::swap(m_datatype_copy, other.m_datatype_copy);
 			
 			m_datatype = &m_datatype_copy;
 			
