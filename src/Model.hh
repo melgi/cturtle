@@ -141,19 +141,19 @@ namespace turtle {
 		
 		RDFList(RDFList &&list) : RDFList()
 		{
-			std::swap(list.m_elements, m_elements);
+			m_elements.swap(list.m_elements);
 		}
 		
 		RDFList& operator=(RDFList list)
 		{
-			std::swap(list.m_elements, m_elements);
+			m_elements.swap(list.m_elements);
 			
 			return *this;
 		}
 		
-		RDFList& operator=(RDFList &&list)
+		RDFList& operator=(RDFList &&list) noexcept
 		{
-			std::swap(list.m_elements, m_elements);
+			m_elements.swap(list.m_elements);
 			
 			return *this;
 		}
@@ -239,8 +239,8 @@ namespace turtle {
 		std::string m_lexical;
 		const std::string *m_datatype;
 		
-		Literal(const std::string &lexical, const std::string *datatype) : N3Node(), m_lexical(lexical), m_datatype(datatype) {}
-		Literal(std::string &&lexical, const std::string *datatype)      : N3Node(), m_lexical(std::move(lexical)), m_datatype(datatype) {}
+		Literal(const std::string &lexical, const std::string *datatype)     : N3Node(), m_lexical(lexical), m_datatype(datatype) {}
+		Literal(std::string &&lexical, const std::string *datatype) noexcept : N3Node(), m_lexical(std::move(lexical)), m_datatype(datatype) {}
 		
 	public:
 		
@@ -361,6 +361,7 @@ namespace turtle {
 	class StringLiteral : public Literal {
 		
 		std::string m_language;
+
 	public:
 		static const std::string TYPE;
 		
@@ -401,7 +402,7 @@ namespace turtle {
 			m_datatype = &m_datatype_copy;
 		}
 		
-		explicit OtherLiteral(std::string &&value, std::string &&datatype) : Literal(std::move(value), nullptr), m_datatype_copy(std::move(datatype))
+		explicit OtherLiteral(std::string &&value, std::string &&datatype) noexcept : Literal(std::move(value), nullptr), m_datatype_copy(std::move(datatype))
 		{
 			m_datatype = &m_datatype_copy;
 		}
@@ -411,27 +412,21 @@ namespace turtle {
 			m_datatype = &m_datatype_copy;
 		}
 		
-		OtherLiteral(OtherLiteral &&other) : Literal(std::move(other.m_lexical), nullptr), m_datatype_copy(std::move(other.m_datatype_copy))
+		OtherLiteral(OtherLiteral &&other) noexcept : Literal(std::move(other.m_lexical), nullptr), m_datatype_copy(std::move(other.m_datatype_copy))
 		{
 			m_datatype = &m_datatype_copy;
 		}
 		
 		OtherLiteral& operator=(OtherLiteral other)
 		{
-			std::swap(m_lexical, other.m_lexical);
-			std::swap(m_datatype_copy, other.m_datatype_copy);
-			
-			m_datatype = &m_datatype_copy;
+			swap(other);
 			
 			return *this;
 		}
 		
-		OtherLiteral& operator=(OtherLiteral &&other)
+		OtherLiteral& operator=(OtherLiteral &&other) noexcept
 		{
-			std::swap(m_lexical, other.m_lexical);
-			std::swap(m_datatype_copy, other.m_datatype_copy);
-			
-			m_datatype = &m_datatype_copy;
+			swap(other);
 			
 			return *this;
 		}
@@ -447,9 +442,22 @@ namespace turtle {
 		{
 			return new OtherLiteral(m_lexical, m_datatype_copy);
 		}
+
+		void swap(OtherLiteral &other)
+		{
+			m_lexical.swap(other.m_lexical);
+			m_datatype_copy.swap(other.m_datatype_copy);
+
+//			m_datatype = &m_datatype_copy;
+		}
 	};
-
-
+	
+	inline void swap(OtherLiteral &x, OtherLiteral &y)
+	{
+		x.swap(y);
+	}
+	
+	
 	struct RDF {
 		static const std::string NS;
 		
