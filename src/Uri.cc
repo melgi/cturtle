@@ -318,6 +318,16 @@ namespace turtle {
 	{
 		return m_value;
 	}
+
+	Uri::operator std::string&&() &&
+	{
+		return std::move(m_value);
+	}
+
+	Uri::operator const std::string&() const &
+	{
+		return m_value;
+	}
 	
 	std::ostream &operator<<(std::ostream &out, const Uri &uri)
 	{

@@ -178,6 +178,9 @@ namespace turtle {
 		Uri resolve(const Uri &reference) const;
 			
 		explicit operator std::string() const;
+
+		explicit operator const std::string&() const &;
+		explicit operator std::string&&() &&;
 			
 		friend std::ostream &operator<<(std::ostream &out, const Uri &uri);
 		
