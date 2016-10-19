@@ -66,7 +66,7 @@ namespace turtle {
 			// nop
 		}
 		
-		void visit(const URIResource &resource)
+		void visit(const URIResource &resource) override
 		{
 			const std::string &uri = resource.uri();
 			
@@ -75,7 +75,7 @@ namespace turtle {
 			m_outbuf->sputc('>');
 		}
 		
-		void visit(const BlankNode &blankNode)
+		void visit(const BlankNode &blankNode) override
 		{
 			const std::string &id = blankNode.id();
 			
@@ -83,14 +83,14 @@ namespace turtle {
 			m_outbuf->sputn(id.c_str(), id.length());
 		}
 		
-		void visit(const Literal &literal)        { output(literal); }
+		void visit(const Literal &literal) override       { output(literal); }
 		
-		void visit(const BooleanLiteral &literal) { output(literal); }
-		void visit(const IntegerLiteral &literal) { output(literal); }
-		void visit(const DoubleLiteral &literal)  { output(literal); }
-		void visit(const DecimalLiteral &literal) { output(literal); }
+		void visit(const BooleanLiteral &literal) override { output(literal); }
+		void visit(const IntegerLiteral &literal) override { output(literal); }
+		void visit(const DoubleLiteral &literal)  override { output(literal); }
+		void visit(const DecimalLiteral &literal) override { output(literal); }
 		
-		void visit(const StringLiteral &literal)
+		void visit(const StringLiteral &literal) override
 		{
 			m_outbuf->sputc('"');
 			output(literal.lexical());
@@ -103,7 +103,7 @@ namespace turtle {
 			}
 		}
 
-		void visit(const RDFList &list)
+		void visit(const RDFList &list) override
 		{
 			// nop
 		}
@@ -127,29 +127,29 @@ namespace turtle {
 			// nop
 		}
 		
-		void start()
+		void start() override
 		{
 			// nop
 		}
 		
-		void end()
+		void end() override
 		{
 			m_outbuf->pubsync(); // flush
 		}
 		
-		void document(const std::string &source)
+		void document(const std::string &source) override
 		{
 			// nop
 		}
 		
-		void prefix(const std::string &prefix, const std::string &ns)
+		void prefix(const std::string &prefix, const std::string &ns) override
 		{
 			// nop
 		}
 		
-		void triple(const Resource &subject, const URIResource &property, const N3Node &object);
+		void triple(const Resource &subject, const URIResource &property, const N3Node &object) override;
 		
-		unsigned count() const { return m_count; }
+		unsigned count() const override { return m_count; }
 		
 	};
 

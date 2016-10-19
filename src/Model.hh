@@ -75,19 +75,19 @@ namespace turtle {
 		
 		const std::string &uri() const { return m_uri; }
 		
-		std::ostream &print(std::ostream &out) const
+		std::ostream &print(std::ostream &out) const override
 		{
 			out << '<' << m_uri << '>';
 			
 			return out;
 		}
 		
-		URIResource *clone() const
+		URIResource *clone() const override
 		{
 			return new URIResource(m_uri);
 		}
 		
-		void visit(N3NodeVisitor &visitor) const
+		void visit(N3NodeVisitor &visitor) const override
 		{
 			visitor.visit(*this);
 		}
@@ -103,19 +103,19 @@ namespace turtle {
 		
 		const std::string &id() const { return m_id; }
 		
-		std::ostream &print(std::ostream &out) const
+		std::ostream &print(std::ostream &out) const override
 		{
 			out << "_:b" << m_id;
 			
 			return out;
 		}
 		
-		BlankNode *clone() const
+		BlankNode *clone() const override
 		{
 			return new BlankNode(m_id);
 		}
 		
-		void visit(N3NodeVisitor &visitor) const
+		void visit(N3NodeVisitor &visitor) const override
 		{
 			visitor.visit(*this);
 		}
@@ -209,7 +209,7 @@ namespace turtle {
 			return m_elements.empty();
 		}
 		
-		std::ostream &print(std::ostream &out) const
+		std::ostream &print(std::ostream &out) const override
 		{
 			out << '(';
 			
@@ -221,12 +221,12 @@ namespace turtle {
 			return out;
 		}
 		
-		RDFList *clone() const
+		RDFList *clone() const override
 		{
 			return new RDFList(*this);
 		}
 		
-		void visit(N3NodeVisitor &visitor) const
+		void visit(N3NodeVisitor &visitor) const override
 		{
 			visitor.visit(*this);
 		}
@@ -248,7 +248,7 @@ namespace turtle {
 		
 		const std::string &datatype() const { return *m_datatype; }
 		
-		void visit(N3NodeVisitor &visitor) const
+		void visit(N3NodeVisitor &visitor) const override
 		{
 			visitor.visit(*this);
 		}
@@ -275,12 +275,12 @@ namespace turtle {
 		
 		bool value() const { return m_lexical == VALUE_TRUE.m_lexical || m_lexical == "1"; }
 		
-		BooleanLiteral *clone() const
+		BooleanLiteral *clone() const override
 		{
 			return new BooleanLiteral(m_lexical);
 		}
 		
-		void visit(N3NodeVisitor &visitor) const
+		void visit(N3NodeVisitor &visitor) const override
 		{
 			visitor.visit(*this);
 		}
@@ -292,19 +292,19 @@ namespace turtle {
 		
 		explicit IntegerLiteral(const std::string &value) : Literal(value, &TYPE) {}
 		
-		std::ostream &print(std::ostream &out) const
+		std::ostream &print(std::ostream &out) const override
 		{
 			out << lexical();
 			
 			return out;
 		}
 		
-		IntegerLiteral *clone() const
+		IntegerLiteral *clone() const override
 		{
 			return new IntegerLiteral(m_lexical);
 		}
 		
-		void visit(N3NodeVisitor &visitor) const
+		void visit(N3NodeVisitor &visitor) const override
 		{
 			visitor.visit(*this);
 		}
@@ -316,19 +316,19 @@ namespace turtle {
 		
 		explicit DoubleLiteral(const std::string &value) : Literal(value, &TYPE) {}
 		
-		std::ostream &print(std::ostream &out) const
+		std::ostream &print(std::ostream &out) const override
 		{
 			out << lexical();
 			
 			return out;
 		}
 		
-		DoubleLiteral *clone() const
+		DoubleLiteral *clone() const override
 		{
 			return new DoubleLiteral(m_lexical);
 		}
 		
-		void visit(N3NodeVisitor &visitor) const
+		void visit(N3NodeVisitor &visitor) const override
 		{
 			visitor.visit(*this);
 		}
@@ -340,19 +340,19 @@ namespace turtle {
 		
 		explicit DecimalLiteral(const std::string &value) : Literal(value, &TYPE) {}
 		
-		std::ostream &print(std::ostream &out) const
+		std::ostream &print(std::ostream &out) const override
 		{
 			out << lexical();
 			
 			return out;
 		}
 		
-		DecimalLiteral *clone() const
+		DecimalLiteral *clone() const override
 		{
 			return new DecimalLiteral(m_lexical);
 		}
 		
-		void visit(N3NodeVisitor &visitor) const
+		void visit(N3NodeVisitor &visitor) const override
 		{
 			visitor.visit(*this);
 		}
@@ -370,7 +370,7 @@ namespace turtle {
 		
 		const std::string &language() const { return m_language; }
 		
-		std::ostream &print(std::ostream &out) const
+		std::ostream &print(std::ostream &out) const override
 		{
 			out << '"' << lexical() << '"';
 			
@@ -380,12 +380,12 @@ namespace turtle {
 			return out;
 		}
 		
-		StringLiteral *clone() const
+		StringLiteral *clone() const override
 		{
 			return new StringLiteral(m_lexical, m_language);
 		}
 		
-		void visit(N3NodeVisitor &visitor) const
+		void visit(N3NodeVisitor &visitor) const override
 		{
 			visitor.visit(*this);
 		}
@@ -431,14 +431,14 @@ namespace turtle {
 			return *this;
 		}
 		
-		std::ostream &print(std::ostream &out) const
+		std::ostream &print(std::ostream &out) const override
 		{
 			out << '"' << lexical() << '"' << '@' << '<' << datatype() << '>';
 			
 			return out;
 		}
 		
-		OtherLiteral *clone() const
+		OtherLiteral *clone() const override
 		{
 			return new OtherLiteral(m_lexical, m_datatype_copy);
 		}
