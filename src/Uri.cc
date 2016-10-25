@@ -20,6 +20,51 @@
 //       12            3  4          5       6  7        8 9
 
 namespace turtle {
+
+	Uri::Uri(const Optional<std::string> &scheme,
+		     const Optional<std::string> &authority,
+		     const std::string &path,
+		     const Optional<std::string> &query,
+		     const Optional<std::string> &fragment)
+			: m_value(),
+			  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
+			  m_authority(std::string::npos), m_authorityLength(std::string::npos),
+			  m_host(std::string::npos),      m_hostLength(std::string::npos),
+			  m_path(std::string::npos),      m_pathLength(std::string::npos),
+			  m_query(std::string::npos),     m_queryLength(std::string::npos),
+			  m_fragment(std::string::npos)
+	{
+		if (scheme) {
+			m_scheme       = 0;
+			m_schemeLength = scheme->length();
+			m_value.append(*scheme).push_back(':');
+		}
+		
+		if (authority) {
+			m_value.append("//");
+			m_authority       = m_value.length();
+			m_authorityLength = authority->length();
+			m_value.append(*authority);
+			parseAuthorityComponents();
+		}
+		
+		m_path       = m_value.length();
+		m_pathLength = path.length();
+		m_value.append(path);
+		
+		if (query) {
+			m_value.push_back('?');
+			m_query       = m_value.length();
+			m_queryLength = query->length();
+			m_value.append(*query);
+		}
+		
+		if (fragment) {
+			m_value.push_back('#');
+			m_fragment = m_value.length();
+			m_value.append(*fragment);
+		}	
+	}
 	
 	void Uri::parseComponents()
 	{
@@ -53,21 +98,6 @@ namespace turtle {
 		}
 		
 		parseAuthorityComponents();
-		
-		if (m_authority != std::string::npos) {
-			if (!(m_pathLength == 0 || m_value[m_path] == '/'))
-				throw UriSyntaxException("path should be empty or start with '/'");
-		} else {
-			if (m_pathLength >= 2 && m_value[m_path] == '/' && m_value[m_path + 1] == '/')
-				throw UriSyntaxException("path starts with '//'");
-		}
-		
-		if (m_scheme == std::string::npos && m_authority == std::string::npos && m_pathLength != 0) {
-			for (std::size_t i = 0; i < m_pathLength && m_value[m_path + i] != '/'; ++i) {
-				if (m_value[m_path + i] == ':')
-					throw UriSyntaxException("relative path reference contains a ':' in the first path segment");
-			}
-		}
 	}
 
 	void Uri::parseAuthority(std::size_t begin)

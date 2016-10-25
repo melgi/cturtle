@@ -443,7 +443,7 @@ namespace turtle {
 			return new OtherLiteral(m_lexical, m_datatype_copy);
 		}
 
-		void swap(OtherLiteral &other)
+		void swap(OtherLiteral &other) noexcept
 		{
 			m_lexical.swap(other.m_lexical);
 			m_datatype_copy.swap(other.m_datatype_copy);
@@ -452,7 +452,7 @@ namespace turtle {
 		}
 	};
 	
-	inline void swap(OtherLiteral &x, OtherLiteral &y)
+	inline void swap(OtherLiteral &x, OtherLiteral &y) noexcept
 	{
 		x.swap(y);
 	}
