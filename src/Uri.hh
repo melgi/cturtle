@@ -51,47 +51,7 @@ namespace turtle {
 		    const Optional<std::string> &authority,
 		    const std::string &path,
 		    const Optional<std::string> &query,
-		    const Optional<std::string> &fragment)
-				: m_value(),
-				  m_scheme(std::string::npos),    m_schemeLength(std::string::npos),
-				  m_authority(std::string::npos), m_authorityLength(std::string::npos),
-				  m_host(std::string::npos),      m_hostLength(std::string::npos),
-				  m_path(std::string::npos),      m_pathLength(std::string::npos),
-				  m_query(std::string::npos),     m_queryLength(std::string::npos),
-				  m_fragment(std::string::npos)
-		
-		{
-			if (scheme) {
-				m_scheme       = 0;
-				m_schemeLength = scheme->length();
-				m_value.append(*scheme).push_back(':');
-			}
-			
-			if (authority) {
-				m_value.append("//");
-				m_authority       = m_value.length();
-				m_authorityLength = authority->length();
-				m_value.append(*authority);
-				parseAuthorityComponents();
-			}
-			
-			m_path       = m_value.length();
-			m_pathLength = path.length();
-			m_value.append(path);
-			
-			if (query) {
-				m_value.push_back('?');
-				m_query       = m_value.length();
-				m_queryLength = query->length();
-				m_value.append(*query);
-			}
-			
-			if (fragment) {
-				m_value.push_back('#');
-				m_fragment = m_value.length();
-				m_value.append(*fragment);
-			}
-		}
+		    const Optional<std::string> &fragment);
 		
 		void parseComponents();
 		void parseAuthority(std::size_t begin);
@@ -126,6 +86,17 @@ namespace turtle {
 			  m_fragment(std::string::npos)
 		{
 			parseComponents();
+		}
+
+		void swap(Uri &uri) noexcept
+		{
+			m_value.swap(uri.m_value);
+			std::swap(m_scheme, uri.m_scheme);       std::swap(m_schemeLength, uri.m_schemeLength);
+			std::swap(m_authority, uri.m_authority); std::swap(m_authorityLength, uri.m_authorityLength);
+			std::swap(m_host, uri.m_host);           std::swap(m_hostLength, uri.m_hostLength);
+			std::swap(m_path, uri.m_path);           std::swap(m_pathLength, uri.m_pathLength);
+			std::swap(m_query, uri.m_query);         std::swap(m_queryLength, uri.m_queryLength);
+			std::swap(m_fragment, uri.m_fragment);
 		}
 		
 		Optional<std::string> scheme() const
@@ -186,7 +157,10 @@ namespace turtle {
 		
 	};
 
-
+	inline void swap(Uri &x, Uri &y) noexcept
+	{
+		x.swap(y);
+	}
 }
 
 #endif /* N3_URI_HH */

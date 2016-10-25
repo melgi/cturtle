@@ -49,15 +49,15 @@ namespace turtle {
 			// nop
 		}
 		
-		void visit(const URIResource &resource);
-		void visit(const BlankNode &blankNode);
-		void visit(const Literal &literal);
-		void visit(const BooleanLiteral &literal);
-		void visit(const IntegerLiteral &literal);
-		void visit(const DoubleLiteral &literal);
-		void visit(const DecimalLiteral &literal);
-		void visit(const StringLiteral &literal);
-		void visit(const RDFList &list);
+		void visit(const URIResource &resource) override;
+		void visit(const BlankNode &blankNode) override;
+		void visit(const Literal &literal) override;
+		void visit(const BooleanLiteral &literal) override;
+		void visit(const IntegerLiteral &literal) override;
+		void visit(const DoubleLiteral &literal) override;
+		void visit(const DecimalLiteral &literal) override;
+		void visit(const StringLiteral &literal) override;
+		void visit(const RDFList &list) override;
 			
 		void output(const std::string &s)
 		{
@@ -192,7 +192,7 @@ namespace turtle {
 			// nop
 		}
 		
-		void document(const std::string &source)
+		void document(const std::string &source) override
 		{
 			m_out << "scope('<";
 			m_formatter.outputUri(source);
@@ -200,7 +200,7 @@ namespace turtle {
 			endl();
 		}
 		
-		void prefix(const std::string &prefix, const std::string &ns)
+		void prefix(const std::string &prefix, const std::string &ns) override
 		{
 			m_out << "pfx('";
 			m_formatter.output(prefix);
@@ -210,11 +210,11 @@ namespace turtle {
 			endl();
 		}
 		
-		void start() { writePrologue(); }
-		void end()   { writeEpilogue(); }
-		void triple(const Resource &subject, const URIResource &property, const N3Node &object);
+		void start() override { writePrologue(); }
+		void end()   override { writeEpilogue(); }
+		void triple(const Resource &subject, const URIResource &property, const N3Node &object) override;
 		
-		unsigned count() const { return m_count; }
+		unsigned count() const override { return m_count; }
 		
 	};
 

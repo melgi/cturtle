@@ -54,12 +54,12 @@ namespace turtle {
 		unsigned m_count;
 	public:
 		DefaultTripleSink() : TripleSink(), m_count(0) {}
-		virtual void start() {}
-		virtual void end() {}
-		virtual void document(const std::string &source) {}
-		virtual void prefix(const std::string &prefix, const std::string &ns) {}
-		virtual void triple(const Resource &subject, const URIResource &property, const N3Node &object) { ++m_count; }
-		virtual unsigned count() const { return m_count; }
+		virtual void start() override {}
+		virtual void end() override {}
+		virtual void document(const std::string &source) override {}
+		virtual void prefix(const std::string &prefix, const std::string &ns) override {}
+		virtual void triple(const Resource &subject, const URIResource &property, const N3Node &object) override { ++m_count; }
+		virtual unsigned count() const override { return m_count; }
 	};
 	
 	
