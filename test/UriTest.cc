@@ -82,6 +82,14 @@ TEST_CASE("resolve", "[uri]") {
 	}
 }
 
+TEST_CASE("absolute", "[uri]") {
+	REQUIRE(turtle::Uri::absolute("g:h"));
+	REQUIRE_FALSE(turtle::Uri::absolute(":"));
+	REQUIRE_FALSE(turtle::Uri::absolute("#:"));
+	REQUIRE_FALSE(turtle::Uri::absolute("g?y/./x"));
+	REQUIRE_FALSE(turtle::Uri::absolute("foo"));
+}
+
 TEST_CASE("parse", "[uri]") {
 	turtle::Uri uri("http://user@www.ics.uci.edu:8080/pub/ietf/uri/#Related");
 	

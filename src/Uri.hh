@@ -145,7 +145,14 @@ namespace turtle {
 		}
 		
 		bool absolute() const { return m_scheme != std::string::npos; }
+		
+		static bool absolute(const std::string &uri) noexcept
+		{
+			int p = uri.find_first_of(":/?#");
 			
+			return p > 0 && uri[p] == ':';
+		}
+		
 		Uri resolve(const Uri &reference) const;
 			
 		explicit operator std::string() const;

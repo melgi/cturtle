@@ -186,7 +186,10 @@ namespace turtle {
 	{
 		if (m_lookAhead == Token::IriRef) {
 			match();
-			return static_cast<std::string>(resolve(extractUri(m_lexeme)));
+			std::string uri = extractUri(m_lexeme);
+			if (Uri::absolute(uri))
+				return std::move(uri);
+			return static_cast<std::string>(resolve(std::move(uri)));
 		} else if (m_lookAhead == Token::PNameLN) {
 			match();
 			return toUri(m_lexeme);
