@@ -23,7 +23,7 @@ namespace turtle {
 	
 		// This table maps bytes to character classes
 		// to reduce the size of the transition table and create bitmasks.
-		alignas(256) const std::uint8_t Decoder::m_type[] = {
+		const std::uint8_t Decoder::m_type[] = {
 			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 0x00 - 0x1F
 			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 0x20 - 0x3F
 			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 0x40 - 0x5F
@@ -36,7 +36,7 @@ namespace turtle {
 		
 		// This table is a transition table that maps a combination
 		// of a state of the automaton and a character class to a state.
-		alignas(256) const std::uint8_t Decoder::m_transition[] = {
+		const std::uint8_t Decoder::m_transition[] = {
 			 0,12,24,36,60,96,84,12,12,12,48,72, // state  0 (ACCEPT)
 			12,12,12,12,12,12,12,12,12,12,12,12, // state 12 (REJECT)
 			12, 0,12,12,12,12,12, 0,12, 0,12,12, // state 24
