@@ -78,47 +78,110 @@ public:
 	
 };
 
+class Graph {
+	
+	std::vector<Triple> m_triples;
+	
+public:
+
+	Graph() : m_triples() {}
+	
+	
+	Graph(const Graph &graph) : m_triples(graph.m_triples)
+	{
+	}
+	
+	Graph(Graph &&graph) : m_triples()
+	{
+		m_triples.swap(graph.m_triples);
+	}
+	
+	Graph &operator=(Graph graph)
+	{
+		swap(graph);
+	
+		return *this;
+	}
+	
+	Graph &operator=(Graph &&graph) noexcept
+	{
+		m_triples.swap(graph.m_triples);
+	
+		return *this;
+	}
+	
+	~Graph()
+	{
+	}
+	
+	void swap(Graph &other) noexcept
+	{
+		m_triples.swap(other.m_triples);
+	}
+	
+	void add(const turtle::Resource &subject, const turtle::URIResource &property, const turtle::N3Node &object)
+	{
+		m_triples.push_back(Triple(subject, property, object));
+	}
+	
+	const Triple &operator[](std::size_t index) const
+	{
+		return m_triples[index];
+	}
+	
+	Triple &operator[](std::size_t index)
+	{
+		return m_triples[index];
+	}
+	
+	std::size_t size() const
+	{
+		return m_triples.size();
+	}
+
+};
 
 class TestSink : public turtle::TripleSink {
-		
-		std::vector<Triple> m_triples;
-		
+	
+	Graph m_graph;
+	
 public:
-		
-		TestSink() : m_triples()
-		{
-			// nop
-		}
-		
-		void start()
-		{
-			// nop
-		}
-		
-		void end()
-		{
-			// nop
-		}
-		
-		void document(const std::string &source)
-		{
-			// nop
-		}
-		
-		void prefix(const std::string &prefix, const std::string &ns)
-		{
-			// nop
-		}
-		
-		void triple(const turtle::Resource &subject, const turtle::URIResource &property, const turtle::N3Node &object)
-		{
-			m_triples.push_back(Triple(subject, property, object));
-		}
-		
-		unsigned count() const { return m_triples.size(); }
-		
-		const std::vector<Triple> &getResult() const { return m_triples; }
-	};
+	
+	TestSink() : m_graph()
+	{
+		// nop
+	}
+	
+	void start()
+	{
+		// nop
+	}
+	
+	void end()
+	{
+		// nop
+	}
+	
+	void document(const std::string &source)
+	{
+		// nop
+	}
+	
+	void prefix(const std::string &prefix, const std::string &ns)
+	{
+		// nop
+	}
+	
+	void triple(const turtle::Resource &subject, const turtle::URIResource &property, const turtle::N3Node &object)
+	{
+		m_graph.add(subject, property, object);
+	}
+	
+	unsigned count() const { return m_graph.size(); }
+	
+	const Graph &getResult() const { return m_graph; }
+};
+
 
 
 TEST_CASE("escaping", "[parser]")
@@ -138,7 +201,7 @@ TEST_CASE("escaping", "[parser]")
 	
 	REQUIRE(handler.count() == 1);
 	
-	const std::vector<Triple> &graph = handler.getResult();
+	const Graph &graph = handler.getResult();
 	
 	turtle::StringLiteral &literal = dynamic_cast<turtle::StringLiteral &>(graph[0].object());
 	
