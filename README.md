@@ -1,7 +1,7 @@
 # CTurtle
 
 CTurtle is a tool for parsing [RDF 1.1 Turtle](http://www.w3.org/TR/turtle/) files and outputting the resulting triples in "N3P" format.
-"N3P" is a RDF serialization format used by the [Eye reasoner](http://eulersharp.sourceforge.net/).
+"N3P" is a RDF serialization format used by the [Eye reasoner](http://github.com/josd/eye).
 
 ## Build status
 
@@ -24,4 +24,4 @@ CTurtle is a tool for parsing [RDF 1.1 Turtle](http://www.w3.org/TR/turtle/) fil
 
 ## Integration with Eye
 
-The [latest version of Eye](https://sourceforge.net/projects/eulersharp/files/eulersharp/EYE-Winter16/) will automatically use CTurtle when using the `--turtle` option to specify Turtle input files.
+The latest version of Eye (since EYE-Winter16) will automatically use CTurtle when using the `--turtle` option to specify Turtle input files.
